@@ -159,8 +159,8 @@ public final class DrawManager {
 		fontRegularMetrics = backBufferGraphics.getFontMetrics(fontRegular);
 		fontBigMetrics = backBufferGraphics.getFontMetrics(fontBig);
 
-		// drawBorders(screen);
-		// drawGrid(screen);
+		//drawBorders(screen);
+		//drawGrid(screen);
 	}
 
 	/**
@@ -241,6 +241,21 @@ public final class DrawManager {
 		backBufferGraphics.setColor(Color.WHITE);
 		String scoreString = String.format("%04d", score);
 		backBufferGraphics.drawString(scoreString, screen.getWidth() - 60, 25);
+	}
+
+	/**
+	 * Draws elapsed time on screen.
+	 *
+	 * @param screen
+	 *            Screen to draw on.
+	 * @param elapsedTime
+	 *            Elapsed time.
+	 */
+	public void drawElapsedTime(final Screen screen, final int elapsedTime) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		String elapsedTimeString = String.format("TIME: %02.2f", (float) elapsedTime / 60);
+		backBufferGraphics.drawString(elapsedTimeString, screen.getWidth()/2, 25);
 	}
 
 	/**
