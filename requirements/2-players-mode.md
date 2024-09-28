@@ -15,8 +15,7 @@ Hello
 
 ## Team Requirements
 ### 2-players-mode
-- Design Split-Screen
-- Add Multiplayer Logic
+
 
 
 ## Detailed Requirements

@@ -165,7 +165,7 @@ pip-log.txt
 #############
 ## Custom
 #############
-/out/
 
 log*
+*.ttf
 .checkstyle
