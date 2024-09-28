@@ -149,10 +149,10 @@ public class GameScreen extends Screen {
 	 */
 	protected final void update() {
 		super.update();
-
-		this.elapsedTime++;
-
 		if (this.inputDelay.checkFinished() && !this.levelFinished) {
+
+			/*Elapsed Time Update*/
+			this.elapsedTime++;
 
 			if (!this.ship.isDestroyed()) {
 				boolean moveRight = inputManager.isKeyDown(KeyEvent.VK_RIGHT)
