@@ -302,17 +302,24 @@ public class GameScreen extends Screen {
 				for (EnemyShip enemyShip : this.enemyShipFormation)
 					if (!enemyShip.isDestroyed()
 							&& checkCollision(bullet, enemyShip)) {
-						this.score += enemyShip.getPointValue();
+						if (combo >= 5)
+							this.score += enemyShip.getPointValue() * (combo / 5 + 1);
+						else
+							this.score += enemyShip.getPointValue();
 						this.shipsDestroyed++;
 						this.combo++;
 						this.enemyShipFormation.destroy(enemyShip);
 						timer.cancel();
 						recyclable.add(bullet);
 					}
+
 				if (this.enemyShipSpecial != null
 						&& !this.enemyShipSpecial.isDestroyed()
 						&& checkCollision(bullet, this.enemyShipSpecial)) {
-					this.score += this.enemyShipSpecial.getPointValue();
+					if (combo >= 5)
+						this.score += enemyShipSpecial.getPointValue() * (combo / 5 + 1);
+					else
+						this.score += enemyShipSpecial.getPointValue();
 					this.shipsDestroyed++;
 					this.combo++;
 					this.enemyShipSpecial.destroy();
