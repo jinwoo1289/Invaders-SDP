@@ -20,6 +20,8 @@ public class GameState {
 	private int shipsDestroyed;
 	/** Elapsed time */
 	private int elapsedTime;
+	/** Special enemy appearances alert message */
+	private String alertMessage;
 
 	/**
 	 * Constructor.
@@ -39,13 +41,14 @@ public class GameState {
 	 */
 	public GameState(final int level, final int score,
 			final int livesRemaining, final int bulletsShot,
-			final int shipsDestroyed, final int elapsedTime) {
+			final int shipsDestroyed, final int elapsedTime, final String alertMessage) {
 		this.level = level;
 		this.score = score;
 		this.livesRemaining = livesRemaining;
 		this.bulletsShot = bulletsShot;
 		this.shipsDestroyed = shipsDestroyed;
 		this.elapsedTime = elapsedTime;
+		this.alertMessage = alertMessage;
 	}
 
 	/**
@@ -87,5 +90,10 @@ public class GameState {
 	 * @return the elapsedTime
 	 */
 	public final int getElapsedTime() { return elapsedTime; }
+
+	/**
+	 * @return the alertMessage
+	 */
+	public final String getAlertMessage() { return alertMessage; }
 
 }

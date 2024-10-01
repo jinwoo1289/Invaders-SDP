@@ -16,6 +16,8 @@ public class Cooldown {
 	private int duration;
 	/** Beginning time. */
 	private long time;
+	/** Special Enemy Alert. */
+	private int alert = 3000;
 
 	/**
 	 * Constructor, established the time until the action can be performed
@@ -51,9 +53,23 @@ public class Cooldown {
 	 * 
 	 * @return Cooldown state.
 	 */
+
 	public final boolean checkFinished() {
 		if ((this.time == 0)
 				|| this.time + this.duration < System.currentTimeMillis())
+			return true;
+		return false;
+	}
+
+	/**
+	 * Checks if the cooldown has as much time left as 'alert'.
+	 *
+	 * @return Alert state.
+	 */
+
+	public final boolean checkAlert() {
+		if ((this.time > 0)
+				&& this.time + this.duration - this.alert <= System.currentTimeMillis())
 			return true;
 		return false;
 	}
