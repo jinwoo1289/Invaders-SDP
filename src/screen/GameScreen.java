@@ -72,6 +72,9 @@ public class GameScreen extends Screen {
 	private boolean bonusLife;
 	/** Elapsed time while playing this game. */
 	private int elapsedTime;
+	/** Alert Message when a special enemy appears. */
+	private String alertMessage;
+
 
 	/**
 	 * Constructor, establishes the properties of the screen.
@@ -99,6 +102,8 @@ public class GameScreen extends Screen {
 		this.level = gameState.getLevel();
 		this.score = gameState.getScore();
 		this.elapsedTime = gameState.getElapsedTime();
+		this.alertMessage = gameState.getAlertMessage();
+
 		this.lives = gameState.getLivesRemaining();
 		if (this.bonusLife)
 			this.lives++;
@@ -186,8 +191,13 @@ public class GameScreen extends Screen {
 			if (this.enemyShipSpecial == null
 					&& this.enemyShipSpecialCooldown.checkFinished()) {
 				this.enemyShipSpecial = new EnemyShip();
+				this.alertMessage = "";
 				this.enemyShipSpecialCooldown.reset();
 				this.logger.info("A special ship appears");
+			}
+			if(this.enemyShipSpecial == null
+					&& this.enemyShipSpecialCooldown.checkAlert()) {
+				this.alertMessage = "!!! ALERT !!!";
 			}
 			if (this.enemyShipSpecial != null
 					&& this.enemyShipSpecial.getPositionX() > this.width) {
@@ -237,6 +247,7 @@ public class GameScreen extends Screen {
 		// Interface.
 		drawManager.drawScore(this, this.score);
 		drawManager.drawElapsedTime(this, this.elapsedTime);
+		drawManager.drawAlertMessage(this, this.alertMessage);
 		drawManager.drawLives(this, this.lives);
 		drawManager.drawHorizontalLine(this, SEPARATION_LINE_HEIGHT - 1);
 
@@ -342,6 +353,7 @@ public class GameScreen extends Screen {
 	 */
 	public final GameState getGameState() {
 		return new GameState(this.level, this.score, this.lives,
-				this.bulletsShot, this.shipsDestroyed, this.elapsedTime);
+				this.bulletsShot, this.shipsDestroyed, this.elapsedTime, this.alertMessage);
+
 	}
 }
