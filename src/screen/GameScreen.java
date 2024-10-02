@@ -76,8 +76,9 @@ public class GameScreen extends Screen {
 	private boolean bonusLife;
 	/** checks if it's timed out. */
 	private boolean timeOver = false;
-
-
+    private boolean isexecuted = false;
+	Timer timer;
+	TimerTask timerTask;
 
 	/**
 	 * Constructor, establishes the properties of the screen.
@@ -278,14 +279,19 @@ public class GameScreen extends Screen {
 	 */
 	private void manageCollisions() {
 		Set<Bullet> recyclable = new HashSet<Bullet>();
-		Timer timer = new Timer();
-		TimerTask timerTask = new TimerTask() {
-			public void run() {
-				timeOver = true;
-				combo = 0;
-			}
-		};
-		timer.schedule(timerTask, 3000);
+
+		if (isexecuted == false){
+			isexecuted = true;
+			timer = new Timer();
+			timerTask = new TimerTask() {
+				public void run() {
+					timeOver = true;
+					combo = 0;
+				}
+			};
+			timer.schedule(timerTask, 3000);
+		}
+
 
 		for (Bullet bullet : this.bullets)
 			if (bullet.getSpeed() > 0) {
@@ -310,6 +316,7 @@ public class GameScreen extends Screen {
 						this.combo++;
 						this.enemyShipFormation.destroy(enemyShip);
 						timer.cancel();
+						isexecuted = false;
 						recyclable.add(bullet);
 					}
 
@@ -325,6 +332,7 @@ public class GameScreen extends Screen {
 					this.enemyShipSpecial.destroy();
 					this.enemyShipSpecialExplosionCooldown.reset();
 					timer.cancel();
+					isexecuted = false;
 
 					recyclable.add(bullet);
 				}
