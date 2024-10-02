@@ -154,6 +154,7 @@ public final class Core {
 							gameState.getElapsedTime(),
 							gameState.getAlertMessage());
 
+
 				} while (gameState.getLivesRemaining() > 0
 						&& gameState.getLevel() <= NUM_LEVELS);
 

@@ -259,6 +259,7 @@ public final class DrawManager {
 	}
 
 	/**
+
 	 * Draws alert message on screen.
 	 *
 	 * @param screen
@@ -273,6 +274,7 @@ public final class DrawManager {
 	}
 
 	/**
+
 	 * Draws number of remaining lives on screen.
 	 * 
 	 * @param screen

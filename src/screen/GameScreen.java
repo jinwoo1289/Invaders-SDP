@@ -75,6 +75,7 @@ public class GameScreen extends Screen {
 	/** Alert Message when a special enemy appears. */
 	private String alertMessage;
 
+
 	/**
 	 * Constructor, establishes the properties of the screen.
 	 * 
@@ -102,6 +103,7 @@ public class GameScreen extends Screen {
 		this.score = gameState.getScore();
 		this.elapsedTime = gameState.getElapsedTime();
 		this.alertMessage = gameState.getAlertMessage();
+
 		this.lives = gameState.getLivesRemaining();
 		if (this.bonusLife)
 			this.lives++;
@@ -352,5 +354,6 @@ public class GameScreen extends Screen {
 	public final GameState getGameState() {
 		return new GameState(this.level, this.score, this.lives,
 				this.bulletsShot, this.shipsDestroyed, this.elapsedTime, this.alertMessage);
+
 	}
 }
