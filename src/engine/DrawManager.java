@@ -559,4 +559,28 @@ public final class DrawManager {
 			drawCenteredBigString(screen, "GO!", screen.getHeight() / 2
 					+ fontBigMetrics.getHeight() / 3);
 	}
+
+	public void drawRecode(List<Score> highScores) {
+
+		//add variable for highest score
+		int highestScore = -1;
+		String highestPlayer = "";
+
+		// find the highest score from highScores list
+		for (Score entry : highScores) {
+			if (entry.getScore() > highestScore) {
+				highestScore = entry.getScore();
+				highestPlayer = entry.getName();
+			}
+		}
+
+		Font font = new Font("Arial", Font.PLAIN, 15);
+		backBufferGraphics.setFont(font);
+		backBufferGraphics.setColor(Color.RED);
+		FontMetrics metrics = backBufferGraphics.getFontMetrics(font);
+		String highScoreDisplay = "RECODE: " + highestPlayer + " - " + highestScore;
+		int x = (backBuffer.getWidth() - metrics.stringWidth(highScoreDisplay)) / 2;
+
+		backBufferGraphics.drawString(highScoreDisplay, 180, 25);
+	}
 }
