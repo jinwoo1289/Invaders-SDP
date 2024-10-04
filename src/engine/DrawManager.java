@@ -563,7 +563,7 @@ public final class DrawManager {
 	public void drawCombo(final Screen screen, final int combo) {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.WHITE);
-		if (combo > 1 ) {
+		if (combo >= 2) {
 			String comboString = String.format("Combo " + "%03d", combo);
 			backBufferGraphics.drawString(comboString, screen.getWidth() - 250, 25);
 		}
