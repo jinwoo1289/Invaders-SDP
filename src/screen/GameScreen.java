@@ -242,6 +242,7 @@ public class GameScreen extends Screen {
 		drawManager.drawScore(this, this.score);
 		drawManager.drawLives(this, this.lives);
 		drawManager.drawHorizontalLine(this, SEPARATION_LINE_HEIGHT - 1);
+		drawManager.drawCombo(this,this.combo);
 
 		// Countdown to game start.
 		if (!this.inputDelay.checkFinished()) {
