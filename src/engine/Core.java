@@ -151,13 +151,9 @@ public final class Core {
 							gameState.getLivesRemaining(),
 							gameState.getBulletsShot(),
 							gameState.getShipsDestroyed(),
-<<<<<<< HEAD
 							gameState.getElapsedTime(),
-							gameState.getAlertMessage());
-
-=======
+							gameState.getAlertMessage(),
 							0);
->>>>>>> combo
 
 				} while (gameState.getLivesRemaining() > 0
 						&& gameState.getLevel() <= NUM_LEVELS);
