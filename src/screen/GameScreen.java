@@ -3,6 +3,8 @@ package screen;
 import java.awt.event.KeyEvent;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import engine.Cooldown;
 import engine.Core;
@@ -64,6 +66,8 @@ public class GameScreen extends Screen {
 	private int bulletsShot;
 	/** Total ships destroyed by the player. */
 	private int shipsDestroyed;
+	/** Total ships destroyed consecutive by the player. */
+	private int combo = 0;
 	/** Moment the game starts. */
 	private long gameStartTime;
 	/** Checks if the level is finished. */
@@ -74,7 +78,11 @@ public class GameScreen extends Screen {
 	private int elapsedTime;
 	/** Alert Message when a special enemy appears. */
 	private String alertMessage;
-
+    /** checks if it's executed. */
+    private boolean isExecuted = false;
+	/** timer.. */
+	private Timer timer;
+	private TimerTask timerTask;
 
 	/**
 	 * Constructor, establishes the properties of the screen.
@@ -250,6 +258,7 @@ public class GameScreen extends Screen {
 		drawManager.drawAlertMessage(this, this.alertMessage);
 		drawManager.drawLives(this, this.lives);
 		drawManager.drawHorizontalLine(this, SEPARATION_LINE_HEIGHT - 1);
+		drawManager.drawCombo(this,this.combo);
 
 		// Countdown to game start.
 		if (!this.inputDelay.checkFinished()) {
@@ -287,6 +296,19 @@ public class GameScreen extends Screen {
 	 */
 	private void manageCollisions() {
 		Set<Bullet> recyclable = new HashSet<Bullet>();
+
+		if (isExecuted == false){
+			isExecuted = true;
+			timer = new Timer();
+			timerTask = new TimerTask() {
+				public void run() {
+					combo = 0;
+				}
+			};
+			timer.schedule(timerTask, 3000);
+		}
+
+
 		for (Bullet bullet : this.bullets)
 			if (bullet.getSpeed() > 0) {
 				if (checkCollision(bullet, this.ship) && !this.levelFinished) {
@@ -302,18 +324,32 @@ public class GameScreen extends Screen {
 				for (EnemyShip enemyShip : this.enemyShipFormation)
 					if (!enemyShip.isDestroyed()
 							&& checkCollision(bullet, enemyShip)) {
-						this.score += enemyShip.getPointValue();
+						if (combo >= 5)
+							this.score += enemyShip.getPointValue() * (combo / 5 + 1);
+						else
+							this.score += enemyShip.getPointValue();
 						this.shipsDestroyed++;
+						this.combo++;
 						this.enemyShipFormation.destroy(enemyShip);
+						timer.cancel();
+						isExecuted = false;
 						recyclable.add(bullet);
 					}
+
 				if (this.enemyShipSpecial != null
 						&& !this.enemyShipSpecial.isDestroyed()
 						&& checkCollision(bullet, this.enemyShipSpecial)) {
-					this.score += this.enemyShipSpecial.getPointValue();
+					if (combo >= 5)
+						this.score += enemyShipSpecial.getPointValue() * (combo / 5 + 1);
+					else
+						this.score += enemyShipSpecial.getPointValue();
 					this.shipsDestroyed++;
+					this.combo++;
 					this.enemyShipSpecial.destroy();
 					this.enemyShipSpecialExplosionCooldown.reset();
+					timer.cancel();
+					isExecuted = false;
+
 					recyclable.add(bullet);
 				}
 			}
@@ -353,7 +389,11 @@ public class GameScreen extends Screen {
 	 */
 	public final GameState getGameState() {
 		return new GameState(this.level, this.score, this.lives,
+<<<<<<< HEAD
 				this.bulletsShot, this.shipsDestroyed, this.elapsedTime, this.alertMessage);
 
+=======
+				this.bulletsShot, this.shipsDestroyed, 0);
+>>>>>>> combo
 	}
 }

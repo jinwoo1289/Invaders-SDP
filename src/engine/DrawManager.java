@@ -590,4 +590,13 @@ public final class DrawManager {
 			drawCenteredBigString(screen, "GO!", screen.getHeight() / 2
 					+ fontBigMetrics.getHeight() / 3);
 	}
+
+	public void drawCombo(final Screen screen, final int combo) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		if (combo >= 2) {
+			String comboString = String.format("Combo " + "%03d", combo);
+			backBufferGraphics.drawString(comboString, screen.getWidth() - 250, 25);
+		}
+	}
 }
