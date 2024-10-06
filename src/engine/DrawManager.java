@@ -579,4 +579,14 @@ public final class DrawManager {
 			drawCenteredBigString(screen, "GO!", screen.getHeight() / 2
 					+ fontBigMetrics.getHeight() / 3);
 	}
+
+	public void drawReloadTimer(final Screen screen, final long remainingTime) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		if(remainingTime > 0){
+			String timerText = "Reload: "+remainingTime/200;
+			backBufferGraphics.drawString(timerText,320,450);
+		}
+	}
+
 }
