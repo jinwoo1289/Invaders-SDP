@@ -238,6 +238,7 @@ public class GameScreen extends Screen {
 	 */
 	private void draw() {
 		drawManager.initDrawing(this);
+		drawManager.drawGameTitle(this);
 
 		drawManager.drawEntity(this.ship, this.ship.getPositionX(),
 				this.ship.getPositionY());
@@ -257,6 +258,7 @@ public class GameScreen extends Screen {
 		drawManager.drawElapsedTime(this, this.elapsedTime);
 		drawManager.drawAlertMessage(this, this.alertMessage);
 		drawManager.drawLives(this, this.lives);
+		drawManager.drawLevel(this, this.level);
 		drawManager.drawHorizontalLine(this, SEPARATION_LINE_HEIGHT - 1);
 		drawManager.drawCombo(this,this.combo);
 

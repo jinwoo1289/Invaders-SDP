@@ -243,6 +243,13 @@ public final class DrawManager {
 		backBufferGraphics.drawString(scoreString, screen.getWidth() - 60, 25);
 	}
 
+	public void drawLevel(final Screen screen, final int level) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		String scoreString = String.format("lv.%d", level);
+		backBufferGraphics.drawString(scoreString, screen.getWidth() / 2 - 60, 25);
+	}
+
 	/**
 	 * Draws elapsed time on screen.
 	 *
@@ -323,6 +330,12 @@ public final class DrawManager {
 
 		backBufferGraphics.setColor(Color.GREEN);
 		drawCenteredBigString(screen, titleString, screen.getHeight() / 3);
+	}
+
+	public void drawGameTitle(final Screen screen) {
+		String titleString = "Invaders";
+		backBufferGraphics.setColor(Color.DARK_GRAY);
+		drawCenteredBigString(screen, titleString, screen.getHeight() / 2);
 	}
 
 	/**
