@@ -259,7 +259,6 @@ public final class DrawManager {
 	}
 
 	/**
-
 	 * Draws alert message on screen.
 	 *
 	 * @param screen
@@ -270,11 +269,11 @@ public final class DrawManager {
 	public void drawAlertMessage(final Screen screen, final String alertMessage) {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.RED);
-		backBufferGraphics.drawString(alertMessage, (screen.getWidth()-92)/2, 65);
+		backBufferGraphics.drawString(alertMessage,
+				(screen.getWidth() - fontRegularMetrics.stringWidth(alertMessage))/2, 65);
 	}
 
 	/**
-
 	 * Draws number of remaining lives on screen.
 	 * 
 	 * @param screen
