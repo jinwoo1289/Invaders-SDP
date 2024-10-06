@@ -580,12 +580,20 @@ public final class DrawManager {
 					+ fontBigMetrics.getHeight() / 3);
 	}
 
-	public void drawReloadTimer(final Screen screen, final long remainingTime) {
+	public void drawReloadTimer(final Screen screen,final Ship ship,final long remainingTime) {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.WHITE);
 		if(remainingTime > 0){
-			String timerText = "Reload: "+remainingTime/200;
-			backBufferGraphics.drawString(timerText,320,450);
+			String timerText = String.format("%d",remainingTime/200);
+
+			int shipX = ship.getPositionX();
+			int shipY = ship.getPositionY();
+			int shipWidth = ship.getWidth();
+			int textWidth = backBufferGraphics.getFontMetrics().stringWidth(timerText);
+			int x = shipX + shipWidth/2 - textWidth/2;
+			int y = shipY - 10;
+
+			backBufferGraphics.drawString(timerText,x,y);
 		}
 	}
 
