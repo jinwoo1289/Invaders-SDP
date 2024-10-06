@@ -56,6 +56,7 @@ public class GameScreen extends Screen {
 	private Cooldown enemyShipSpecialExplosionCooldown;
 	/** Time from finishing the level to screen change. */
 	private Cooldown screenFinishedCooldown;
+	private Cooldown shootingCooldown;
 	/** Set of all bullets fired by on screen ships. */
 	private Set<Bullet> bullets;
 	/** Current score. */
@@ -240,6 +241,8 @@ public class GameScreen extends Screen {
 		drawManager.initDrawing(this);
 		drawManager.drawGameTitle(this);
 
+		drawManager.drawLaunchTrajectory( this,this.ship.getPositionX());
+
 		drawManager.drawEntity(this.ship, this.ship.getPositionX(),
 				this.ship.getPositionY());
 		if (this.enemyShipSpecial != null)
@@ -260,7 +263,9 @@ public class GameScreen extends Screen {
 		drawManager.drawLives(this, this.lives);
 		drawManager.drawLevel(this, this.level);
 		drawManager.drawHorizontalLine(this, SEPARATION_LINE_HEIGHT - 1);
+		drawManager.drawReloadTimer(this,this.ship,ship.getRemainingReloadTime());
 		drawManager.drawCombo(this,this.combo);
+
 
 		// Countdown to game start.
 		if (!this.inputDelay.checkFinished()) {
