@@ -630,7 +630,35 @@ public final class DrawManager {
 			drawCenteredBigString(screen, "GO!", screen.getHeight() / 2
 					+ fontBigMetrics.getHeight() / 3);
 	}
+   /**
+	 * Draws recorded highscores on screen.
+	 *
+	 * @param highScores
+	 *            Recorded highscores.
+   */
+  
+	public void drawRecode(List<Score> highScores) {
 
+		//add variable for highest score
+		int highestScore = -1;
+		String highestPlayer = "";
+
+		// find the highest score from highScores list
+		for (Score entry : highScores) {
+			if (entry.getScore() > highestScore) {
+				highestScore = entry.getScore();
+				highestPlayer = entry.getName();
+			}
+		}
+
+
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		FontMetrics metrics = backBufferGraphics.getFontMetrics(fontRegular);
+		String highScoreDisplay = "RECODE: " + highestPlayer + " - " + highestScore;
+		int x = (backBuffer.getWidth() - metrics.stringWidth(highScoreDisplay)) / 2;
+
+		backBufferGraphics.drawString(highScoreDisplay, 10, 90);
   /**
 	 * Draws ReloadTimer on screen.
 	 *
