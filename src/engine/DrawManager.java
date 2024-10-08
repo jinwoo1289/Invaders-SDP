@@ -649,7 +649,7 @@ public final class DrawManager {
 	 *            Recorded highscores.
    */
   
-	public void drawRecode(List<Score> highScores, final Screen screen) {
+	public void drawRecord(List<Score> highScores, final Screen screen) {
 
 		//add variable for highest score
 		int highestScore = -1;
@@ -667,10 +667,10 @@ public final class DrawManager {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.WHITE);
 		FontMetrics metrics = backBufferGraphics.getFontMetrics(fontRegular);
-		String highScoreDisplay = "RECODE: " + highestPlayer + " - " + highestScore;
+		String highScoreDisplay = "RECORD: " + highestPlayer + " - " + highestScore;
 		int x = (backBuffer.getWidth() - metrics.stringWidth(highScoreDisplay)) / 2;
 
-		backBufferGraphics.drawString(highScoreDisplay, screen.getWidth()-438, 85);
+		backBufferGraphics.drawString(highScoreDisplay, screen.getWidth()-420, 85);
 	}
   /**
 	 * Draws ReloadTimer on screen.

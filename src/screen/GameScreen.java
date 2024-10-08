@@ -291,7 +291,7 @@ public class GameScreen extends Screen {
 		}
 
 		//add drawRecode method for drawing
-		drawManager.drawRecode(highScores,this);
+		drawManager.drawRecord(highScores,this);
 
 		drawManager.completeDrawing(this);
 	}
