@@ -27,6 +27,8 @@ public class Ship extends Entity {
 	/** Time spent inactive between hits. */
 	private Cooldown destructionCooldown;
 
+	private long lastShootTime;
+
 	/**
 	 * Constructor, establishes the ship's properties.
 	 * 
@@ -41,6 +43,7 @@ public class Ship extends Entity {
 		this.spriteType = SpriteType.Ship;
 		this.shootingCooldown = Core.getCooldown(SHOOTING_INTERVAL);
 		this.destructionCooldown = Core.getCooldown(1000);
+		this.lastShootTime = 0;
 	}
 
 	/**
@@ -71,6 +74,7 @@ public class Ship extends Entity {
 			this.shootingCooldown.reset();
 			bullets.add(BulletPool.getBullet(positionX + this.width / 2,
 					positionY, BULLET_SPEED));
+			this.lastShootTime = System.currentTimeMillis();
 			return true;
 		}
 		return false;
@@ -110,4 +114,13 @@ public class Ship extends Entity {
 	public final int getSpeed() {
 		return SPEED;
 	}
+
+	public long getRemainingReloadTime(){
+		long currentTime = System.currentTimeMillis();
+		long elapsedTime = currentTime - this.lastShootTime;
+		long remainingTime = SHOOTING_INTERVAL - elapsedTime;
+		return remainingTime > 0 ? remainingTime : 0;
+	}
+
+
 }
