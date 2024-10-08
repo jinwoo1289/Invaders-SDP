@@ -254,7 +254,7 @@ public class GameScreen extends Screen {
 			drawManager.drawHorizontalLine(this, this.height / 2 + this.height / 12);
 		}
 
-		// add drawRecode method for drawing
+		//add drawRecode method for drawing
 		drawManager.drawRecode(highScores);
 
 		drawManager.completeDrawing(this);

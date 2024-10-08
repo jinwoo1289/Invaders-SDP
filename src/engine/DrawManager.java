@@ -574,9 +574,9 @@ public final class DrawManager {
 			}
 		}
 
-		Font font = new Font("Arial", Font.PLAIN, 15);
+		Font font = new Font("Arial", Font.BOLD, 13);
 		backBufferGraphics.setFont(font);
-		backBufferGraphics.setColor(Color.RED);
+		backBufferGraphics.setColor(Color.WHITE);
 		FontMetrics metrics = backBufferGraphics.getFontMetrics(font);
 		String highScoreDisplay = "RECODE: " + highestPlayer + " - " + highestScore;
 		int x = (backBuffer.getWidth() - metrics.stringWidth(highScoreDisplay)) / 2;
