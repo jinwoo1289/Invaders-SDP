@@ -242,6 +242,20 @@ public final class DrawManager {
 		String scoreString = String.format("%04d", score);
 		backBufferGraphics.drawString(scoreString, screen.getWidth() - 60, 25);
 	}
+    /**
+	 * Draws level on screen.
+	 * 
+	 * @param screen
+	 *            Screen to draw on.
+	 * @param level
+	 *            Current level.
+	 */
+	public void drawLevel(final Screen screen, final int level) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		String scoreString = String.format("lv.%d", level);
+		backBufferGraphics.drawString(scoreString, screen.getWidth() / 2 - 60, 25);
+	}
 
 	/**
 	 * Draws elapsed time on screen.
@@ -286,6 +300,22 @@ public final class DrawManager {
 	}
 
 	/**
+
+	 * Draws alert message on screen.
+	 *
+	 * @param screen
+	 *            Screen to draw on.
+	 * @param alertMessage
+	 *            Alert message.
+	 */
+	public void drawAlertMessage(final Screen screen, final String alertMessage) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.RED);
+		backBufferGraphics.drawString(alertMessage, (screen.getWidth()-92)/2, 65);
+	}
+
+	/**
+
 	 * Draws number of remaining lives on screen.
 	 * 
 	 * @param screen
@@ -300,6 +330,26 @@ public final class DrawManager {
 		Ship dummyShip = new Ship(0, 0);
 		for (int i = 0; i < lives; i++)
 			drawEntity(dummyShip, 40 + 35 * i, 10);
+	}
+
+	/**
+	 * Draws launch trajectory on screen.
+	 *
+	 * @param screen
+	 *            Screen to draw on.
+	 * @param positionX
+	 *            X coordinate of the line.
+	 */
+
+	public void drawLaunchTrajectory(final Screen screen, final int positionX) {
+		backBufferGraphics.setColor(Color.DARK_GRAY);
+		for (int i = 0; i < screen.getHeight() - 60; i += 20){
+			backBufferGraphics.drawRect(positionX + 13, screen.getHeight() - 30 - i,1,10);
+
+		}
+
+
+
 	}
 
 	/**
@@ -334,6 +384,12 @@ public final class DrawManager {
 
 		backBufferGraphics.setColor(Color.GREEN);
 		drawCenteredBigString(screen, titleString, screen.getHeight() / 3);
+	}
+
+	public void drawGameTitle(final Screen screen) {
+		String titleString = "Invaders";
+		backBufferGraphics.setColor(Color.DARK_GRAY);
+		drawCenteredBigString(screen, titleString, screen.getHeight() / 2);
 	}
 
 	/**
@@ -600,5 +656,77 @@ public final class DrawManager {
 		else
 			drawCenteredBigString(screen, "GO!", screen.getHeight() / 2
 					+ fontBigMetrics.getHeight() / 3);
+	}
+   /**
+	 * Draws recorded highscores on screen.
+	 *
+	 * @param highScores
+	 *            Recorded highscores.
+   */
+  
+	public void drawRecode(List<Score> highScores) {
+
+		//add variable for highest score
+		int highestScore = -1;
+		String highestPlayer = "";
+
+		// find the highest score from highScores list
+		for (Score entry : highScores) {
+			if (entry.getScore() > highestScore) {
+				highestScore = entry.getScore();
+				highestPlayer = entry.getName();
+			}
+		}
+
+
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		FontMetrics metrics = backBufferGraphics.getFontMetrics(fontRegular);
+		String highScoreDisplay = "RECODE: " + highestPlayer + " - " + highestScore;
+		int x = (backBuffer.getWidth() - metrics.stringWidth(highScoreDisplay)) / 2;
+
+		backBufferGraphics.drawString(highScoreDisplay, 10, 90);
+  /**
+	 * Draws ReloadTimer on screen.
+	 *
+	 * @param screen
+	 *            Screen to draw on.
+	 * @param ship
+	 *            player's ship.
+   * @param remainingTime
+	 *            remaining reload time.
+	 */
+	public void drawReloadTimer(final Screen screen,final Ship ship,final long remainingTime) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		if(remainingTime > 0){
+			String timerText = String.format("%d",remainingTime/200);
+
+			int shipX = ship.getPositionX();
+			int shipY = ship.getPositionY();
+			int shipWidth = ship.getWidth();
+			int textWidth = backBufferGraphics.getFontMetrics().stringWidth(timerText);
+			int x = shipX + shipWidth/2 - textWidth/2;
+			int y = shipY - 10;
+
+			backBufferGraphics.drawString(timerText,x,y);
+		}
+	}
+  
+  /**
+	 * Draws Combo on screen.
+	 *
+	 * @param screen
+	 *            Screen to draw on.
+	 * @param combo
+	 *            Number of enemies killed in a row.
+	 */
+	public void drawCombo(final Screen screen, final int combo) {
+		backBufferGraphics.setFont(fontRegular);
+		backBufferGraphics.setColor(Color.WHITE);
+		if (combo >= 2) {
+			String comboString = String.format("Combo " + "%03d", combo);
+			backBufferGraphics.drawString(comboString, screen.getWidth() - 100, 85);
+		}
 	}
 }

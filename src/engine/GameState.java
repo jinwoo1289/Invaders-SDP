@@ -22,6 +22,8 @@ public class GameState {
 	private int elapsedTime;
 	/** Special enemy appearances alert message */
 	private String alertMessage;
+  /** Ships destroyed consecutive. */
+	private int combo;
 
 	/**
 	 * Constructor.
@@ -38,10 +40,13 @@ public class GameState {
 	 *            Ships destroyed until now.
 	 * @param elapsedTime
 	 * 			  Elapsed time.
+	 * @param combo
+	 *            Ships destroyed consequtive.
 	 */
 	public GameState(final int level, final int score,
 			final int livesRemaining, final int bulletsShot,
-			final int shipsDestroyed, final int elapsedTime, final String alertMessage) {
+			final int shipsDestroyed, final int elapsedTime, final String alertMessage, final int combo) {
+				
 		this.level = level;
 		this.score = score;
 		this.livesRemaining = livesRemaining;
@@ -49,6 +54,7 @@ public class GameState {
 		this.shipsDestroyed = shipsDestroyed;
 		this.elapsedTime = elapsedTime;
 		this.alertMessage = alertMessage;
+		this.combo = combo;
 	}
 
 	/**

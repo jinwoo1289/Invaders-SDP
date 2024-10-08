@@ -1,13 +1,14 @@
 package screen;
 
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import engine.Cooldown;
-import engine.Core;
-import engine.GameSettings;
-import engine.GameState;
+import engine.*;
 import entity.Bullet;
 import entity.BulletPool;
 import entity.EnemyShip;
@@ -54,6 +55,7 @@ public class GameScreen extends Screen {
 	private Cooldown enemyShipSpecialExplosionCooldown;
 	/** Time from finishing the level to screen change. */
 	private Cooldown screenFinishedCooldown;
+	private Cooldown shootingCooldown;
 	/** Set of all bullets fired by on screen ships. */
 	private Set<Bullet> bullets;
 	/** Current score. */
@@ -64,16 +66,25 @@ public class GameScreen extends Screen {
 	private int bulletsShot;
 	/** Total ships destroyed by the player. */
 	private int shipsDestroyed;
+	/** Total ships destroyed consecutive by the player. */
+	private int combo = 0;
 	/** Moment the game starts. */
 	private long gameStartTime;
 	/** Checks if the level is finished. */
 	private boolean levelFinished;
 	/** Checks if a bonus life is received. */
 	private boolean bonusLife;
+	/** list of highScores for find recode. */
+	private List<Score>highScores;
 	/** Elapsed time while playing this game. */
 	private int elapsedTime;
 	/** Alert Message when a special enemy appears. */
 	private String alertMessage;
+  /** checks if it's executed. */
+  private boolean isExecuted = false;
+	/** timer.. */
+	private Timer timer;
+	private TimerTask timerTask;
 
 	/**
 	 * Constructor, establishes the properties of the screen.
@@ -107,6 +118,14 @@ public class GameScreen extends Screen {
 			this.lives++;
 		this.bulletsShot = gameState.getBulletsShot();
 		this.shipsDestroyed = gameState.getShipsDestroyed();
+
+		try {
+			this.highScores = Core.getFileManager().loadHighScores();
+
+		} catch (IOException e) {
+			logger.warning("Couldn't load high scores!");
+		}
+
 	}
 
 	/**
@@ -236,9 +255,11 @@ public class GameScreen extends Screen {
 	 */
 	private void draw() {
 		drawManager.initDrawing(this);
+		drawManager.drawGameTitle(this);
 
-		drawManager.drawEntity(this.ship, this.ship.getPositionX(),
-				this.ship.getPositionY());
+		drawManager.drawLaunchTrajectory( this,this.ship.getPositionX());
+
+		drawManager.drawEntity(this.ship, this.ship.getPositionX(), this.ship.getPositionY());
 		if (this.enemyShipSpecial != null)
 			drawManager.drawEntity(this.enemyShipSpecial,
 					this.enemyShipSpecial.getPositionX(),
@@ -250,25 +271,27 @@ public class GameScreen extends Screen {
 			drawManager.drawEntity(bullet, bullet.getPositionX(),
 					bullet.getPositionY());
 
-		// Interface.
+
 		drawManager.drawScore(this, this.score);
 		drawManager.drawElapsedTime(this, this.elapsedTime);
 		drawManager.drawAlertMessage(this, this.alertMessage);
 		drawManager.drawLives(this, this.lives);
+		drawManager.drawLevel(this, this.level);
 		drawManager.drawHorizontalLine(this, SEPARATION_LINE_HEIGHT - 1);
+		drawManager.drawReloadTimer(this,this.ship,ship.getRemainingReloadTime());
+		drawManager.drawCombo(this,this.combo);
+
 
 		// Countdown to game start.
 		if (!this.inputDelay.checkFinished()) {
-			int countdown = (int) ((INPUT_DELAY
-					- (System.currentTimeMillis()
-							- this.gameStartTime)) / 1000);
-			drawManager.drawCountDown(this, this.level, countdown,
-					this.bonusLife);
-			drawManager.drawHorizontalLine(this, this.height / 2 - this.height
-					/ 12);
-			drawManager.drawHorizontalLine(this, this.height / 2 + this.height
-					/ 12);
+			int countdown = (int) ((INPUT_DELAY - (System.currentTimeMillis() - this.gameStartTime)) / 1000);
+			drawManager.drawCountDown(this, this.level, countdown, this.bonusLife);
+			drawManager.drawHorizontalLine(this, this.height / 2 - this.height / 12);
+			drawManager.drawHorizontalLine(this, this.height / 2 + this.height / 12);
 		}
+
+		//add drawRecode method for drawing
+		drawManager.drawRecode(highScores);
 
 		drawManager.completeDrawing(this);
 	}
@@ -293,6 +316,19 @@ public class GameScreen extends Screen {
 	 */
 	private void manageCollisions() {
 		Set<Bullet> recyclable = new HashSet<Bullet>();
+
+		if (isExecuted == false){
+			isExecuted = true;
+			timer = new Timer();
+			timerTask = new TimerTask() {
+				public void run() {
+					combo = 0;
+				}
+			};
+			timer.schedule(timerTask, 3000);
+		}
+
+
 		for (Bullet bullet : this.bullets)
 			if (bullet.getSpeed() > 0) {
 				if (checkCollision(bullet, this.ship) && !this.levelFinished) {
@@ -308,18 +344,32 @@ public class GameScreen extends Screen {
 				for (EnemyShip enemyShip : this.enemyShipFormation)
 					if (!enemyShip.isDestroyed()
 							&& checkCollision(bullet, enemyShip)) {
-						this.score += enemyShip.getPointValue();
+						if (combo >= 5)
+							this.score += enemyShip.getPointValue() * (combo / 5 + 1);
+						else
+							this.score += enemyShip.getPointValue();
 						this.shipsDestroyed++;
+						this.combo++;
 						this.enemyShipFormation.destroy(enemyShip);
+						timer.cancel();
+						isExecuted = false;
 						recyclable.add(bullet);
 					}
+
 				if (this.enemyShipSpecial != null
 						&& !this.enemyShipSpecial.isDestroyed()
 						&& checkCollision(bullet, this.enemyShipSpecial)) {
-					this.score += this.enemyShipSpecial.getPointValue();
+					if (combo >= 5)
+						this.score += enemyShipSpecial.getPointValue() * (combo / 5 + 1);
+					else
+						this.score += enemyShipSpecial.getPointValue();
 					this.shipsDestroyed++;
+					this.combo++;
 					this.enemyShipSpecial.destroy();
 					this.enemyShipSpecialExplosionCooldown.reset();
+					timer.cancel();
+					isExecuted = false;
+
 					recyclable.add(bullet);
 				}
 			}
@@ -359,6 +409,6 @@ public class GameScreen extends Screen {
 	 */
 	public final GameState getGameState() {
 		return new GameState(this.level, this.score, this.lives,
-				this.bulletsShot, this.shipsDestroyed, this.elapsedTime, this.alertMessage);
+				this.bulletsShot, this.shipsDestroyed, this.elapsedTime, this.alertMessage, 0);
 	}
 }
