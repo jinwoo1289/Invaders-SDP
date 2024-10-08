@@ -119,7 +119,7 @@ public final class DrawManager {
 
 	/**
 	 * Returns shared instance of DrawManager.
-	 * 
+	 *
 	 * @return Shared instance of DrawManager.
 	 */
 	protected static DrawManager getInstance() {
@@ -130,7 +130,7 @@ public final class DrawManager {
 
 	/**
 	 * Sets the frame to draw the image on.
-	 * 
+	 *
 	 * @param currentFrame
 	 *            Frame to draw on.
 	 */
@@ -141,7 +141,7 @@ public final class DrawManager {
 	/**
 	 * First part of the drawing process. Initialices buffers, draws the
 	 * background and prepares the images.
-	 * 
+	 *
 	 * @param screen
 	 *            Screen to draw in.
 	 */
@@ -165,7 +165,7 @@ public final class DrawManager {
 
 	/**
 	 * Draws the completed drawing on screen.
-	 * 
+	 *
 	 * @param screen
 	 *            Screen to draw on.
 	 */
@@ -176,7 +176,7 @@ public final class DrawManager {
 
 	/**
 	 * Draws an entity, using the apropiate image.
-	 * 
+	 *
 	 * @param entity
 	 *            Entity to be drawn.
 	 * @param positionX
@@ -198,7 +198,7 @@ public final class DrawManager {
 
 	/**
 	 * For debugging purpouses, draws the canvas borders.
-	 * 
+	 *
 	 * @param screen
 	 *            Screen to draw in.
 	 */
@@ -215,7 +215,7 @@ public final class DrawManager {
 
 	/**
 	 * For debugging purpouses, draws a grid over the canvas.
-	 * 
+	 *
 	 * @param screen
 	 *            Screen to draw in.
 	 */
@@ -230,7 +230,7 @@ public final class DrawManager {
 
 	/**
 	 * Draws current score on screen.
-	 * 
+	 *
 	 * @param screen
 	 *            Screen to draw on.
 	 * @param score
@@ -244,7 +244,7 @@ public final class DrawManager {
 	}
     /**
 	 * Draws level on screen.
-	 * 
+	 *
 	 * @param screen
 	 *            Screen to draw on.
 	 * @param level
@@ -283,21 +283,6 @@ public final class DrawManager {
         }
         backBufferGraphics.drawString(elapsedTimeString, screen.getWidth()/2, 25);
     }
-
-	/**
-	 * Draws alert message on screen.
-	 *
-	 * @param screen
-	 *            Screen to draw on.
-	 * @param alertMessage
-	 *            Alert message.
-	 */
-	public void drawAlertMessage(final Screen screen, final String alertMessage) {
-		backBufferGraphics.setFont(fontRegular);
-		backBufferGraphics.setColor(Color.RED);
-		backBufferGraphics.drawString(alertMessage,
-				(screen.getWidth() - fontRegularMetrics.stringWidth(alertMessage))/2, 65);
-	}
 
 	/**
 
@@ -686,6 +671,7 @@ public final class DrawManager {
 		int x = (backBuffer.getWidth() - metrics.stringWidth(highScoreDisplay)) / 2;
 
 		backBufferGraphics.drawString(highScoreDisplay, 10, 90);
+	}
   /**
 	 * Draws ReloadTimer on screen.
 	 *
