@@ -73,6 +73,20 @@ public class Cooldown {
 			return true;
 		return false;
 	}
+ 
+  // 경고등 애니메이션 //
+	public final int checkAlertAnimation() {
+		if ((this.time > 0)
+				&& this.time + this.duration - (this.alert / 3) <= System.currentTimeMillis())
+			return 3;
+		else if ((this.time > 0)
+				&& this.time + this.duration - 2 * (this.alert / 3) <= System.currentTimeMillis())
+			return 2;
+		else if ((this.time > 0)
+				&& this.time + this.duration - this.alert <= System.currentTimeMillis())
+			return 1;
+		return 0;
+	}
 
 	/**
 	 * Restarts the cooldown.

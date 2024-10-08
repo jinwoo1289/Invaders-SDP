@@ -113,7 +113,6 @@ public class GameScreen extends Screen {
 		this.score = gameState.getScore();
 		this.elapsedTime = gameState.getElapsedTime();
 		this.alertMessage = gameState.getAlertMessage();
-
 		this.lives = gameState.getLivesRemaining();
 		if (this.bonusLife)
 			this.lives++;
@@ -215,7 +214,15 @@ public class GameScreen extends Screen {
 			}
 			if(this.enemyShipSpecial == null
 					&& this.enemyShipSpecialCooldown.checkAlert()) {
-				this.alertMessage = "!!! ALERT !!!";
+				if (this.enemyShipSpecialCooldown.checkAlertAnimation() == 3){
+					this.alertMessage = "!!! ALERT !!!";
+				}else if (this.enemyShipSpecialCooldown.checkAlertAnimation() == 2){
+					this.alertMessage = "-!! ALERT !!-";
+				} else if (this.enemyShipSpecialCooldown.checkAlertAnimation() == 1){
+					this.alertMessage = "--! ALERT !--";
+				} else {
+					this.alertMessage = "";
+				}
 			}
 			if (this.enemyShipSpecial != null
 					&& this.enemyShipSpecial.getPositionX() > this.width) {

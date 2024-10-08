@@ -4,8 +4,8 @@ package engine;
  * Implements an object that stores the state of the game between levels.
  * 
  * @author <a href="mailto:RobertoIA1987@gmail.com">Roberto Izquierdo Amo</a>
- *
- **/
+ * 
+ */
 public class GameState {
 
 	/** Current game level. */
@@ -22,7 +22,7 @@ public class GameState {
 	private int elapsedTime;
 	/** Special enemy appearances alert message */
 	private String alertMessage;
-    /** Ships destroyed consecutive. */
+  /** Ships destroyed consecutive. */
 	private int combo;
 
 	/**
@@ -97,11 +97,9 @@ public class GameState {
 	 */
 	public final int getElapsedTime() { return elapsedTime; }
 
-
 	/**
 	 * @return the alertMessage
 	 */
 	public final String getAlertMessage() { return alertMessage; }
-
 
 }
