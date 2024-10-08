@@ -574,13 +574,13 @@ public final class DrawManager {
 			}
 		}
 
-		Font font = new Font("Arial", Font.BOLD, 13);
-		backBufferGraphics.setFont(font);
+
+		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.WHITE);
-		FontMetrics metrics = backBufferGraphics.getFontMetrics(font);
+		FontMetrics metrics = backBufferGraphics.getFontMetrics(fontRegular);
 		String highScoreDisplay = "RECODE: " + highestPlayer + " - " + highestScore;
 		int x = (backBuffer.getWidth() - metrics.stringWidth(highScoreDisplay)) / 2;
 
-		backBufferGraphics.drawString(highScoreDisplay, 180, 25);
+		backBufferGraphics.drawString(highScoreDisplay, 10, 90);
 	}
 }
