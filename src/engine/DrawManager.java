@@ -253,10 +253,22 @@ public final class DrawManager {
 	 */
 	public void drawElapsedTime(final Screen screen, final int elapsedTime) {
 		backBufferGraphics.setFont(fontRegular);
-		backBufferGraphics.setColor(Color.WHITE);
-		String elapsedTimeString = String.format("TIME: %02.2f", (float) elapsedTime / 60);
-		backBufferGraphics.drawString(elapsedTimeString, screen.getWidth()/2, 25);
-	}
+		backBufferGraphics.setColor(Color.LIGHT_GRAY);
+
+		int fps = 60;
+		int cent = (100*(elapsedTime % fps))/60;
+		int seconds = elapsedTime / fps;
+		int sec = seconds % fps;
+		int min = seconds / fps;
+
+        String elapsedTimeString;
+        if (min < 1){
+            elapsedTimeString = String.format("%d.%02d", sec, cent);
+        } else {
+            elapsedTimeString = String.format("%d:%02d.%02d", min, sec, cent);
+        }
+        backBufferGraphics.drawString(elapsedTimeString, screen.getWidth()/2, 25);
+    }
 
 	/**
 	 * Draws alert message on screen.
