@@ -365,10 +365,10 @@ public class GameScreen extends Screen {
 
 
 	private void manageCollisions() {
-		// 총알을 추적하기 위한 Iterator 생성
+		// Create an iterator to track bullets
 		Iterator<Bullet> iterator = this.bullets.iterator();
 
-		// 적 함대 중 가장 위에 있는 적의 y 위치 찾기
+		// Find the Y position of the highest enemy in the formation
 		int topEnemyY = Integer.MAX_VALUE;
 		for (EnemyShip enemyShip : this.enemyShipFormation) {
 			if (!enemyShip.isDestroyed() && enemyShip.getPositionY() < topEnemyY) {
@@ -379,60 +379,59 @@ public class GameScreen extends Screen {
 			topEnemyY = this.enemyShipSpecial.getPositionY();
 		}
 
-		// 모든 총알을 순회
+		// Iterate through all bullets
 		while (iterator.hasNext()) {
 			Bullet bullet = iterator.next();
 
-			// 플레이어가 발사한 총알 (양수 속도)
+			// Bullets fired by the player (positive speed)
 			if (bullet.getSpeed() > 0) {
 				if (checkCollision(bullet, this.ship) && !this.levelFinished) {
 					if (!this.ship.isDestroyed()) {
-						this.ship.destroy(); // 플레이어 배 파괴
-						this.lives--; // 플레이어의 남은 목숨 감소
-						this.combo = 0; // 콤보 초기화 (플레이어가 맞으면 콤보 리셋)
+						this.ship.destroy();
+						this.lives--;
+						this.combo = 0;
 						this.logger.info("Hit on player ship, " + this.lives + " lives remaining.");
 					}
-					iterator.remove(); // 안전하게 총알 제거
-					cancombo = false; // 플레이어가 맞으면 콤보 불가 설정
+					iterator.remove();
+					cancombo = false;
 				}
-			} else { // 적이 발사한 총알 (음수 속도)
-				boolean hitEnemy = false; // 적이 맞았는지 여부를 추적하는 변수
+			} else { // Bullets fired by enemies (negative speed)
+				boolean hitEnemy = false;
 
-				// 적 함대의 각 함선과 충돌 여부 확인
 				for (EnemyShip enemyShip : this.enemyShipFormation) {
 					if (!enemyShip.isDestroyed() && checkCollision(bullet, enemyShip)) {
-						this.score += enemyShip.getPointValue(); // 점수 증가
+						this.score += comboScore(enemyShip.getPointValue(), this.combo);
 						if (cancombo) {
-							this.combo++; // 콤보 증가
+							this.combo++;
 						} else {
-							this.combo = 1; // 콤보 초기화 후 첫 콤보 설정
+							this.combo = 1;
 							cancombo = true;
 						}
-						this.shipsDestroyed++; // 파괴된 적 수 증가
-						this.enemyShipFormation.destroy(enemyShip); // 적 함선 파괴
-						iterator.remove(); // 안전하게 총알 제거
-						hitEnemy = true; // 적을 맞췄음을 표시
-						break; // 적을 맞췄으면 반복 종료
+						this.shipsDestroyed++;
+						this.enemyShipFormation.destroy(enemyShip);
+						iterator.remove();
+						hitEnemy = true;
+						break;
 					}
 				}
 
-				// 특별한 적 함선과의 충돌 여부 확인
+				// Check collision with the special enemy ship
 				if (!hitEnemy && this.enemyShipSpecial != null && !this.enemyShipSpecial.isDestroyed() && checkCollision(bullet, this.enemyShipSpecial)) {
-					this.score += enemyShipSpecial.getPointValue(); // 점수 증가
+					this.score += comboScore(enemyShipSpecial.getPointValue(), this.combo);
 					if (cancombo) {
-						this.combo++; // 콤보 증가
+						this.combo++;
 					} else {
-						this.combo = 1; // 콤보 초기화 후 첫 콤보 설정
+						this.combo = 1;
 						cancombo = true;
 					}
-					this.shipsDestroyed++; // 파괴된 적 수 증가
-					this.enemyShipSpecial.destroy(); // 특별 적 함선 파괴
-					this.enemyShipSpecialExplosionCooldown.reset(); // 특별 적 폭발 쿨다운 초기화
-					iterator.remove(); // 안전하게 총알 제거
-					hitEnemy = true; // 적을 맞췄음을 표시
+					this.shipsDestroyed++;
+					this.enemyShipSpecial.destroy();
+					this.enemyShipSpecialExplosionCooldown.reset();
+					iterator.remove();
+					hitEnemy = true;
 				}
 
-				// 총알이 가장 위에 있는 적의 y 좌표를 지나쳤지만 적을 맞추지 못한 경우 콤보를 리셋
+				// Reset the combo if the bullet passed the top enemy's Y position without hitting anything
 				if (!hitEnemy && bullet.getPositionY() < topEnemyY) {
 					this.combo = 0;
 					this.cancombo = false;
@@ -440,8 +439,13 @@ public class GameScreen extends Screen {
 			}
 		}
 	}
-
-
+	private int comboScore(int baseScore, int combo) {
+		if (combo >= 5) {
+			return baseScore * (combo / 5 + 1);
+		} else {
+			return baseScore;
+		}
+	}
 
 
 	/**
