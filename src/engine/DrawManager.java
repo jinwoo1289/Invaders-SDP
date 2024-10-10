@@ -686,16 +686,14 @@ public final class DrawManager {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.WHITE);
 		if(remainingTime > 0){
-			String timerText = String.format("%d",remainingTime/200);
-
 			int shipX = ship.getPositionX();
 			int shipY = ship.getPositionY();
 			int shipWidth = ship.getWidth();
-			int textWidth = backBufferGraphics.getFontMetrics().stringWidth(timerText);
-			int x = shipX + shipWidth/2 - textWidth/2;
-			int y = shipY - 10;
-
-			backBufferGraphics.drawString(timerText,x,y);
+			int circleSize = 16;
+			int startAngle = 0;
+			int endAngle = startAngle - (360 * (int)remainingTime / 600);
+			backBufferGraphics.fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
+					circleSize, circleSize, startAngle, endAngle);
 		}
 	}
   
