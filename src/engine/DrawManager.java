@@ -648,7 +648,7 @@ public final class DrawManager {
 	 * @param highScores
 	 *            Recorded highscores.
    */
-  
+
 	public void drawRecord(List<Score> highScores, final Screen screen) {
 
 		//add variable for highest score
@@ -696,7 +696,7 @@ public final class DrawManager {
 					circleSize, circleSize, startAngle, endAngle);
 		}
 	}
-  
+
   /**
 	 * Draws Combo on screen.
 	 *
