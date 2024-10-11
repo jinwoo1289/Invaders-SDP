@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 import engine.*;
@@ -138,7 +140,9 @@ public class GameScreen extends Screen {
 	 * Checks if the player can continue combo.
 	 */
 	private boolean cancombo = true;
-
+    private boolean isExecuted = false;
+	private Timer timer;
+	private TimerTask timertask;
 
 	/**
 	 * Constructor, establishes the properties of the screen.
@@ -366,8 +370,18 @@ public class GameScreen extends Screen {
 
 	private void manageCollisions() {
 		// Create an iterator to track bullets
-		Iterator<Bullet> iterator = this.bullets.iterator();
+		Set<Bullet> recyclable = new HashSet<Bullet>();
 
+		if (isExecuted == false) {
+			isExecuted = true;
+			timer = new Timer();
+			timertask = new TimerTask() {
+				public void run() {
+					combo = 0;
+				}
+			};
+			timer.schedule(timertask, 3000);
+		}
 		// Find the Y position of the highest enemy in the formation
 		int topEnemyY = Integer.MAX_VALUE;
 		for (EnemyShip enemyShip : this.enemyShipFormation) {
@@ -379,73 +393,57 @@ public class GameScreen extends Screen {
 			topEnemyY = this.enemyShipSpecial.getPositionY();
 		}
 
-		// Iterate through all bullets
-		while (iterator.hasNext()) {
-			Bullet bullet = iterator.next();
+		for (Bullet bullet : this.bullets)
 
 			// Bullets fired by the player (positive speed)
 			if (bullet.getSpeed() > 0) {
 				if (checkCollision(bullet, this.ship) && !this.levelFinished) {
+					recyclable.add(bullet);
 					if (!this.ship.isDestroyed()) {
 						this.ship.destroy();
 						this.lives--;
-						this.combo = 0;
 						this.logger.info("Hit on player ship, " + this.lives + " lives remaining.");
 					}
-					iterator.remove();
-					cancombo = false;
+
 				}
 			} else { // Bullets fired by enemies (negative speed)
-				boolean hitEnemy = false;
-
 				for (EnemyShip enemyShip : this.enemyShipFormation) {
 					if (!enemyShip.isDestroyed() && checkCollision(bullet, enemyShip)) {
-						this.score += comboScore(enemyShip.getPointValue(), this.combo);
-						if (cancombo) {
-							this.combo++;
-						} else {
-							this.combo = 1;
-							cancombo = true;
-						}
+						this.score += Score.comboScore(enemyShip.getPointValue(), this.combo);
+						this.combo++;
 						this.shipsDestroyed++;
 						this.enemyShipFormation.destroy(enemyShip);
-						iterator.remove();
-						hitEnemy = true;
-						break;
+						timer.cancel();
+						isExecuted = false;
+						recyclable.add(bullet);
+
 					}
 				}
 
 				// Check collision with the special enemy ship
-				if (!hitEnemy && this.enemyShipSpecial != null && !this.enemyShipSpecial.isDestroyed() && checkCollision(bullet, this.enemyShipSpecial)) {
-					this.score += comboScore(enemyShipSpecial.getPointValue(), this.combo);
-					if (cancombo) {
-						this.combo++;
-					} else {
-						this.combo = 1;
-						cancombo = true;
-					}
+				if (this.enemyShipSpecial != null && !this.enemyShipSpecial.isDestroyed() && checkCollision(bullet, this.enemyShipSpecial)) {
+					this.score += Score.comboScore(enemyShipSpecial.getPointValue(), this.combo);
+					this.combo++;
 					this.shipsDestroyed++;
 					this.enemyShipSpecial.destroy();
 					this.enemyShipSpecialExplosionCooldown.reset();
-					iterator.remove();
-					hitEnemy = true;
+					timer.cancel();
+					isExecuted = false;
+					recyclable.add(bullet);
+
 				}
 
 				// Reset the combo if the bullet passed the top enemy's Y position without hitting anything
-				if (!hitEnemy && bullet.getPositionY() < topEnemyY) {
+				if (bullet.getPositionY() < topEnemyY) {
 					this.combo = 0;
-					this.cancombo = false;
+					isExecuted = true;
 				}
 			}
+			this.bullets.removeAll(recyclable);
+			BulletPool.recycle(recyclable);
 		}
-	}
-	private int comboScore(int baseScore, int combo) {
-		if (combo >= 5) {
-			return baseScore * (combo / 5 + 1);
-		} else {
-			return baseScore;
-		}
-	}
+	
+
 
 
 	/**
