@@ -3,6 +3,7 @@ package entity;
 import engine.DrawManager.SpriteType;
 import engine.Sound;
 import engine.SoundManager;
+import engine.Drawable;
 
 import java.awt.*;
 
@@ -17,7 +18,7 @@ import java.awt.*;
  * @author D0hunLee
  *
  */
-public class ItemBox extends Entity {
+public class ItemBox extends Entity implements Drawable {
     /** Check if it was dropped right now. */
     private boolean droppedRightNow;
 
@@ -56,4 +57,11 @@ public class ItemBox extends Entity {
     public boolean isDroppedRightNow() {
         return this.droppedRightNow;
     }
+
+    public int getPositionX() {return positionX;}
+    public int getPositionY() {return positionY;}
+
+
 }
+
+

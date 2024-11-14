@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
@@ -317,6 +318,9 @@ public final class DrawManager {
 							+ j * 2, 1, 1);
 	}
 
+
+
+
     /**
      * Draws an entity, using the appropriate image.
      *
@@ -340,6 +344,18 @@ public final class DrawManager {
                     threadBufferGraphics[threadNumber].drawRect(positionX + i * 2, positionY
                             + j * 2, 1, 1);
     }
+
+	public <T extends Entity> void drawEntities(Set<T> entities) {
+		for (T entity : entities) {
+			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
+		}
+	}
+
+	public <T extends Entity> void drawEntities(Set<T> entities, final int threadNumber ) {
+		for (T entity : entities) {
+			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
+		}
+	}
 
 	//Drawing an Entity (Blocker) that requires angle setting
 	public void drawRotatedEntity(Entity entity, int x, int y, double angle) {

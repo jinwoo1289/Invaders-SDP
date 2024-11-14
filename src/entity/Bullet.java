@@ -3,6 +3,7 @@ package entity;
 import java.awt.Color;
 
 import engine.DrawManager.SpriteType;
+import engine.Drawable;
 
 /**
  * Implements a bullet that moves vertically up or down.
@@ -10,7 +11,7 @@ import engine.DrawManager.SpriteType;
  * @author <a href="mailto:RobertoIA1987@gmail.com">Roberto Izquierdo Amo</a>
  * 
  */
-public class Bullet extends Entity {
+public class Bullet extends Entity implements Drawable {
 
 	/**
 	 * Speed of the bullet, positive or negative depending on direction -
@@ -71,4 +72,7 @@ public class Bullet extends Entity {
 	public final int getSpeed() {
 		return this.speed;
 	}
+
+	public int getPositionX() {return positionX;}
+	public int getPositionY() {return positionY;}
 }
