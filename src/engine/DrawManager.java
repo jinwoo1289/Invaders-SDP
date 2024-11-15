@@ -5,20 +5,16 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 import entity.*;
-import screen.GameSettingScreen;
 import screen.Screen;
 
 /**
@@ -106,10 +102,6 @@ public final class DrawManager {
 		Web,
 		/** Obstacles preventing a player's bullet */
 		Block,
-		/** Obstruction 1 (satellite) */
-		Blocker1,
-		/** Obstruction 2 (Astronaut) */
-		Blocker2,
         /** 2nd player ship. */
         Ship2,
         /** 3rd player ship. */
@@ -126,7 +118,7 @@ public final class DrawManager {
 		EnemyShipE2,
 		/** Elite enemy ship - first form. */
 		EnemyShipF1
-	};
+	}
 
 	/**
 	 * Private constructor.
@@ -155,8 +147,6 @@ public final class DrawManager {
 			spriteMap.put(SpriteType.ItemBox, new boolean[7][7]);
 			spriteMap.put(SpriteType.Web, new boolean[12][8]);
 			spriteMap.put(SpriteType.Block, new boolean[20][7]);
-			spriteMap.put(SpriteType.Blocker1, new boolean[182][93]); // artificial satellite
-			spriteMap.put(SpriteType.Blocker2, new boolean[82][81]); // astronaut
 			spriteMap.put(SpriteType.Ship2, new boolean[13][8]);
 			spriteMap.put(SpriteType.Ship3, new boolean[13][8]);
 			spriteMap.put(SpriteType.Ship4, new boolean[13][8]);
@@ -318,9 +308,6 @@ public final class DrawManager {
 							+ j * 2, 1, 1);
 	}
 
-
-
-
     /**
      * Draws an entity, using the appropriate image.
      *
@@ -344,55 +331,6 @@ public final class DrawManager {
                     threadBufferGraphics[threadNumber].drawRect(positionX + i * 2, positionY
                             + j * 2, 1, 1);
     }
-
-	public <T extends Entity> void drawEntities(Set<T> entities) {
-		for (T entity : entities) {
-			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
-		}
-	}
-
-	public <T extends Entity> void drawEntities(Set<T> entities, final int threadNumber ) {
-		for (T entity : entities) {
-			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
-		}
-	}
-
-	//Drawing an Entity (Blocker) that requires angle setting
-	public void drawRotatedEntity(Entity entity, int x, int y, double angle) {
-		Graphics2D g2d = (Graphics2D) backBufferGraphics; // Convert to Graphics2D
-		AffineTransform oldTransform = g2d.getTransform(); // Save previous conversion
-
-		//Set center point to rotate
-		int centerX = x + entity.getWidth() / 2;
-		int centerY = y + entity.getHeight() / 2;
-
-		//rotate by a given angle
-		g2d.rotate(Math.toRadians(angle), centerX, centerY);
-
-		//Drawing entities
-		drawEntity(entity, x, y);
-
-		g2d.setTransform(oldTransform); // Restore to original conversion state
-	}
-
-	//Drawing an Entity (Blocker) that requires angle setting
-	public void drawRotatedEntity(Entity entity, int x, int y, double angle, final int threadNumber) {
-		Graphics2D g2d = (Graphics2D) threadBufferGraphics[threadNumber]; // Convert to Graphics2D
-		AffineTransform oldTransform = g2d.getTransform(); // Save previous conversion
-
-		//Set center point to rotate
-		int centerX = x + entity.getWidth() / 2;
-		int centerY = y + entity.getHeight() / 2;
-
-		//rotate by a given angle
-		g2d.rotate(Math.toRadians(angle), centerX, centerY);
-
-		//Drawing entities
-		drawEntity(entity, x, y, threadNumber);
-
-		g2d.setTransform(oldTransform); // Restore to original conversion state
-	}
-
 	/**
 	 * For debugging purposes, draws the canvas borders.
 	 * 
@@ -776,8 +714,6 @@ public final class DrawManager {
 		drawCenteredRegularString(screen, exitString, screen.getHeight()
 				/ 7 * 4 + fontRegularMetrics.getHeight() * 9);
 	}
-
-
 
 	/**
 	 * Draws game results.
@@ -1226,12 +1162,6 @@ public final class DrawManager {
 		backBufferGraphics.drawString(string, screen.getWidth() / 4
 				- fontRegularMetrics.stringWidth(string) / 2, height);
 	}
-	public void drawLeftSideScoreSmallString(final Screen screen,
-											   final String string, final int height) {
-		backBufferGraphics.setFont(fontSmall);
-		backBufferGraphics.drawString(string, screen.getWidth() / 4
-				- fontRegularMetrics.stringWidth(string) / 3, height);
-	}
 
 	//right side Cumulative score
 	public void drawRightSideCumulativeRegularString(final Screen screen,
@@ -1253,12 +1183,6 @@ public final class DrawManager {
 													 final String string, final int height) {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.drawString(string, screen.getWidth() *22/ 100
-				- fontRegularMetrics.stringWidth(string) / 2, height);
-	}
-	public void drawLeftSideAchievementSmallString(final Screen screen,
-													 final String string, final int height) {
-		backBufferGraphics.setFont(fontSmall);
-		backBufferGraphics.drawString(string, screen.getWidth() *26/ 100
 				- fontRegularMetrics.stringWidth(string) / 2, height);
 	}
 
@@ -1316,9 +1240,6 @@ public final class DrawManager {
 		backBufferGraphics.setFont(fontBig);
 		backBufferGraphics.drawString(string, screen.getWidth()*81/100 , height);
 	}
-
-
-
 
 	/**
 	 * Draws a centered string on big font.
@@ -1459,27 +1380,14 @@ public final class DrawManager {
 			int shipY = ship.getPositionY();
 			int shipWidth = ship.getWidth();
 			int circleSize = 16;
-			int startAngle = 90;
-			int endAngle = 0;
-			switch(Core.BASE_SHIP){
-				case Ship.ShipType.VoidReaper:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 0.4);
-				    break;
-				case Ship.ShipType.CosmicCruiser:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.6);
-				    break;
-				case Ship.ShipType.StarDefender:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.0);
-					break;
-				case Ship.ShipType.GalacticGuardian:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.2);
-					break;
-
-
-			}
-
-			backBufferGraphics.fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
-					circleSize, circleSize, startAngle, endAngle);
+			int endAngle = switch (Core.BASE_SHIP) {
+                case Ship.ShipType.VoidReaper -> 360 * (int) remainingTime / (int) (750 * 0.4);
+                case Ship.ShipType.CosmicCruiser -> 360 * (int) remainingTime / (int) (750 * 1.6);
+                case Ship.ShipType.StarDefender -> 360 * (int) remainingTime / (int) (750 * 1.0);
+                case Ship.ShipType.GalacticGuardian -> 360 * (int) remainingTime / (int) (750 * 1.2);
+            };
+            backBufferGraphics.fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
+					circleSize, circleSize, 90, endAngle);
 		}
 	}
 	/**
@@ -1503,24 +1411,14 @@ public final class DrawManager {
 			int shipY = ship.getPositionY();
 			int shipWidth = ship.getWidth();
 			int circleSize = 16;
-			int startAngle = 90;
-			int endAngle = 0;
-			switch(Core.BASE_SHIP){
-				case Ship.ShipType.VoidReaper:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 0.4);
-					break;
-				case Ship.ShipType.CosmicCruiser:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.6);
-					break;
-				case Ship.ShipType.StarDefender:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.0);
-					break;
-				case Ship.ShipType.GalacticGuardian:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.2);
-					break;
-			}
-			threadBufferGraphics[threadNumber].fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
-					circleSize, circleSize, startAngle, endAngle);
+			int endAngle = switch (Core.BASE_SHIP) {
+                case Ship.ShipType.VoidReaper -> 360 * (int) remainingTime / (int) (750 * 0.4);
+                case Ship.ShipType.CosmicCruiser -> 360 * (int) remainingTime / (int) (750 * 1.6);
+                case Ship.ShipType.StarDefender -> 360 * (int) remainingTime / (int) (750 * 1.0);
+                case Ship.ShipType.GalacticGuardian -> 360 * (int) remainingTime / (int) (750 * 1.2);
+            };
+            threadBufferGraphics[threadNumber].fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
+					circleSize, circleSize, 90, endAngle);
 		}
 	}
 
