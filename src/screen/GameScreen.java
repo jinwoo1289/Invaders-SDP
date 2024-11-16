@@ -754,7 +754,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	 */
 	private void manageCollisions() {
 		Set<Bullet> recyclable = new HashSet<Bullet>();
-
 		if (isExecuted == false){
 			isExecuted = true;
 			timer = new Timer();
@@ -766,116 +765,139 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			timer.schedule(timerTask, 3000);
 		}
 
-		int topEnemyY = Integer.MAX_VALUE;
-		for (EnemyShip enemyShip : this.enemyShipFormation) {
-			if (enemyShip != null && !enemyShip.isDestroyed() && enemyShip.getPositionY() < topEnemyY) {
-				topEnemyY = enemyShip.getPositionY();
-			}
-		}
-		if (this.enemyShipSpecial != null && !this.enemyShipSpecial.isDestroyed() && this.enemyShipSpecial.getPositionY() < topEnemyY) {
-			topEnemyY = this.enemyShipSpecial.getPositionY();
-		}
 
 		for (Bullet bullet : this.bullets) {
 
 			// Enemy ship's bullets
 			if (bullet.getSpeed() > 0) {
-				if (checkCollision(bullet, this.ship) && !this.levelFinished && !itemManager.isGhostActive()) {
-					recyclable.add(bullet);
-					if (!this.ship.isDestroyed()) {
-						this.ship.destroy(balance);
-						lvdamage();
-						this.logger.info("Hit on player ship, " + this.lives + " lives remaining.");
-					}
-				}
+				shipCollision(recyclable, bullet);
 
 				if (this.barriers != null) {
-					Iterator<Barrier> barrierIterator = this.barriers.iterator();
-					while (barrierIterator.hasNext()) {
-						Barrier barrier = barrierIterator.next();
-						if (checkCollision(bullet, barrier)) {
-							recyclable.add(bullet);
-							barrier.reduceHealth(balance);
-							if (barrier.isDestroyed()) {
-								barrierIterator.remove();
-							}
-						}
-					}
+					barrierCollision(recyclable, bullet);
 				}
 
 			} else {	// Player ship's bullets
 				for (EnemyShip enemyShip : this.enemyShipFormation)
-					if (enemyShip != null && !enemyShip.isDestroyed()
-							&& checkCollision(bullet, enemyShip)) {
-						// Decide whether to destroy according to physical strength
-						this.enemyShipFormation.HealthManageDestroy(enemyShip, balance);
-						// If the enemy doesn't die, the combo increases;
-						// if the enemy dies, both the combo and score increase.
-						this.score += Score.comboScore(this.enemyShipFormation.getPoint(), this.combo);
-						this.shipsDestroyed += this.enemyShipFormation.getDistroyedship();
-						this.combo++;
-						this.hitBullets++;
-						if (this.combo > this.maxCombo) this.maxCombo = this.combo;
-						timer.cancel();
-						isExecuted = false;
-						recyclable.add(bullet);
+					enemyShipCollision(recyclable, bullet, enemyShip);
+				enemyShipSpecialCollision(recyclable, bullet);
 
-						if (enemyShip.getHealth() < 0 && itemManager.dropItem()) {
-							this.itemBoxes.add(new ItemBox(enemyShip.getPositionX() + 6, enemyShip.getPositionY() + 1, balance));
-							logger.info("Item box dropped");
-						}
-					}
 
-				if (this.enemyShipSpecial != null
-						&& !this.enemyShipSpecial.isDestroyed()
-						&& checkCollision(bullet, this.enemyShipSpecial)) {
-					this.score += Score.comboScore(this.enemyShipSpecial.getPointValue(), this.combo);
-					this.shipsDestroyed++;
-					this.combo++;
-					this.hitBullets++;
-					if (this.combo > this.maxCombo) this.maxCombo = this.combo;
-					this.enemyShipSpecial.destroy(balance);
-					this.enemyShipSpecialExplosionCooldown.reset();
-					timer.cancel();
-					isExecuted = false;
-
-					recyclable.add(bullet);
-				}
-
-				if (this.itemManager.getShotNum() == 1 && bullet.getPositionY() < topEnemyY) {
+				if (this.itemManager.getShotNum() == 1 && bullet.getPositionY() < getTopEnemyY()) {
 					this.combo = 0;
 					isExecuted = true;
 				}
 
-				Iterator<ItemBox> itemBoxIterator = this.itemBoxes.iterator();
-				while (itemBoxIterator.hasNext()) {
-					ItemBox itemBox = itemBoxIterator.next();
-					if (checkCollision(bullet, itemBox) && !itemBox.isDroppedRightNow()) {
-						this.hitBullets++;
-						itemBoxIterator.remove();
-						recyclable.add(bullet);
-						Entry<Integer, Integer> itemResult = this.itemManager.useItem();
-
-						if (itemResult != null) {
-							this.score += itemResult.getKey();
-							this.shipsDestroyed += itemResult.getValue();
-						}
-					}
-				}
+				itemBoxCollision(recyclable, bullet);
 
 				//check the collision between the obstacle and the bullet
-				for (Block block : this.block) {
-					if (checkCollision(bullet, block)) {
-						recyclable.add(bullet);
-                        soundManager.playSound(Sound.BULLET_BLOCKING, balance);
-						break;
-					}
+				bulletBlockCollision(recyclable, bullet);
+			}
+		}
+		Set<Block> removableBlocks = new HashSet<>();
+
+		enemyShipBlockCollision(removableBlocks);
+
+
+		// remove crashed obstacle
+		block.removeAll(removableBlocks);
+		this.bullets.removeAll(recyclable);
+		BulletPool.recycle(recyclable);
+	}
+
+	private void shipCollision(Set<Bullet> recyclable, Bullet bullet) {
+		if (checkCollision(bullet, this.ship) && !this.levelFinished && !itemManager.isGhostActive()) {
+			recyclable.add(bullet);
+			if (!this.ship.isDestroyed()) {
+				this.ship.destroy(balance);
+				lvdamage();
+				this.logger.info("Hit on player ship, " + this.lives + " lives remaining.");
+			}
+		}
+	}
+
+	private void enemyShipCollision(Set<Bullet> recyclable, Bullet bullet, EnemyShip enemyShip) {
+		if (enemyShip != null && !enemyShip.isDestroyed()
+				&& checkCollision(bullet, enemyShip)) {
+			// Decide whether to destroy according to physical strength
+			this.enemyShipFormation.HealthManageDestroy(enemyShip, balance);
+			// If the enemy doesn't die, the combo increases;
+			// if the enemy dies, both the combo and score increase.
+			this.score += Score.comboScore(this.enemyShipFormation.getPoint(), this.combo);
+			this.shipsDestroyed += this.enemyShipFormation.getDistroyedship();
+			this.combo++;
+			this.hitBullets++;
+			if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+			timer.cancel();
+			isExecuted = false;
+			recyclable.add(bullet);
+
+			if (enemyShip.getHealth() < 0 && itemManager.dropItem()) {
+				this.itemBoxes.add(new ItemBox(enemyShip.getPositionX() + 6, enemyShip.getPositionY() + 1, balance));
+				logger.info("Item box dropped");
+			}
+		}
+	}
+
+	private void enemyShipSpecialCollision(Set<Bullet> recyclable, Bullet bullet) {
+		if (this.enemyShipSpecial != null
+				&& !this.enemyShipSpecial.isDestroyed()
+				&& checkCollision(bullet, this.enemyShipSpecial)) {
+			this.score += Score.comboScore(this.enemyShipSpecial.getPointValue(), this.combo);
+			this.shipsDestroyed++;
+			this.combo++;
+			this.hitBullets++;
+			if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+			this.enemyShipSpecial.destroy(balance);
+			this.enemyShipSpecialExplosionCooldown.reset();
+			timer.cancel();
+			isExecuted = false;
+
+			recyclable.add(bullet);
+		}
+	}
+
+	private void barrierCollision(Set<Bullet> recyclable, Bullet bullet) {
+		Iterator<Barrier> barrierIterator = this.barriers.iterator();
+		while (barrierIterator.hasNext()) {
+			Barrier barrier = barrierIterator.next();
+			if (checkCollision(bullet, barrier)) {
+				recyclable.add(bullet);
+				barrier.reduceHealth(balance);
+				if (barrier.isDestroyed()) {
+					barrierIterator.remove();
 				}
 			}
 		}
+	}
 
+	private void itemBoxCollision(Set<Bullet> recyclable, Bullet bullet) {
+		Iterator<ItemBox> itemBoxIterator = this.itemBoxes.iterator();
+		while (itemBoxIterator.hasNext()) {
+			ItemBox itemBox = itemBoxIterator.next();
+			if (checkCollision(bullet, itemBox) && !itemBox.isDroppedRightNow()) {
+				this.hitBullets++;
+				itemBoxIterator.remove();
+				recyclable.add(bullet);
+				Entry<Integer, Integer> itemResult = this.itemManager.useItem();
+
+				if (itemResult != null) {
+					this.score += itemResult.getKey();
+					this.shipsDestroyed += itemResult.getValue();
+				}
+			}
+		}
+	}
+	private void bulletBlockCollision(Set<Bullet> recyclable, Bullet bullet) {
+		for (Block block : this.block) {
+			if (checkCollision(bullet, block)) {
+				recyclable.add(bullet);
+				soundManager.playSound(Sound.BULLET_BLOCKING, balance);
+				break;
+			}
+		}
+	}
+	private void enemyShipBlockCollision(Set<Block> removableBlocks) {
 		//check the collision between the obstacle and the enemyship
-		Set<Block> removableBlocks = new HashSet<>();
 		for (EnemyShip enemyShip : this.enemyShipFormation) {
 			if (enemyShip != null && !enemyShip.isDestroyed()) {
 				for (Block block : block) {
@@ -885,12 +907,20 @@ public class GameScreen extends Screen implements Callable<GameState> {
 				}
 			}
 		}
-
-		// remove crashed obstacle
-		block.removeAll(removableBlocks);
-		this.bullets.removeAll(recyclable);
-		BulletPool.recycle(recyclable);
 	}
+	private int getTopEnemyY() {
+		int topEnemyY = Integer.MAX_VALUE;
+		for (EnemyShip enemyShip : this.enemyShipFormation) {
+			if (enemyShip != null && !enemyShip.isDestroyed() && enemyShip.getPositionY() < topEnemyY) {
+				topEnemyY = enemyShip.getPositionY();
+			}
+		}
+		if (this.enemyShipSpecial != null && !this.enemyShipSpecial.isDestroyed() && this.enemyShipSpecial.getPositionY() < topEnemyY) {
+			topEnemyY = this.enemyShipSpecial.getPositionY();
+		}
+		return topEnemyY;
+	}
+
 
 	/**
 	 * Checks if two entities are colliding.
