@@ -86,83 +86,37 @@ public class GameSettings {
 	public GameSettings LevelSettings(int formationWidth, int formationHeight,
 									  int baseSpeed, int shootingFrecuency, int level, int difficulty) {
 		this.difficulty = difficulty;
-		return switch (difficulty) {
-			case 0 -> {
-				if(level%3 == 0 && level < 5){
-					if(formationWidth == formationHeight){
-						if(formationWidth < 14) formationWidth += 1;
-                    } else {
-						if(formationHeight < 10) formationHeight += 1;
-                    }
-                    if(baseSpeed-10 > -150)baseSpeed -= 10;
-					else baseSpeed = -150;
-                    if(shootingFrecuency-100 > 100) shootingFrecuency -= 100;
-					else shootingFrecuency = 100;
-                }else if(level % 2 == 0 && level >= 5){
-					if(formationWidth == formationHeight){
-						if(formationWidth < 14) formationWidth += 1;
-					} else {
-						if(formationHeight < 10) formationHeight += 1;
-					}
-					if(baseSpeed-10 > -150)baseSpeed -= 10;
-					else baseSpeed = -150;
-					if(shootingFrecuency-100 > 100) shootingFrecuency -= 100;
-					else shootingFrecuency = 100;
-				}
-                yield new GameSettings(formationWidth, formationHeight, baseSpeed, shootingFrecuency);
+
+		// Adjust formation dimensions based on level and difficulty
+		if ((difficulty == 0 && level % 3 == 0 && level < 5) || (level % 2 == 0 && level >= 5)) {
+			int increment = (level >= 5 && difficulty == 2) ? 2 : 1;
+			if (formationWidth == formationHeight) {
+				formationWidth = Math.min(14, formationWidth + increment);
+			} else {
+				formationHeight = Math.min(10, formationHeight + increment);
 			}
-			case 1 -> {
-				if(level%2 == 0 && level < 5){
-					if(formationWidth == formationHeight){
-						if(formationWidth < 14) formationWidth += 1;
-					} else {
-						if(formationHeight < 10) formationHeight += 1;
-					}
-					if(baseSpeed-10 > -150)baseSpeed -= 10;
-					else baseSpeed = -150;
-					if(shootingFrecuency-200 > 200) shootingFrecuency -= 200;
-					else shootingFrecuency = 100;
-				}else if(level >= 5){
-					if(formationWidth == formationHeight){
-						if(formationWidth < 14) formationWidth += 1;
-					} else {
-						if(formationHeight < 10) formationHeight += 1;
-					}
-					if(baseSpeed-20 > -150)baseSpeed -= 20; //speed control
-					else baseSpeed = -150;
-					if(shootingFrecuency-300 > 300) shootingFrecuency -= 300; //Adjust firing interval
-					else shootingFrecuency = 100;
-				}
-                yield new GameSettings(formationWidth, formationHeight, baseSpeed, shootingFrecuency);
-			}
-			case 2 -> {
-				if(level%2 == 0 && level < 5){
-					if(formationWidth == formationHeight){
-						if(formationWidth < 14) formationWidth += 1;
-					} else {
-						if(formationHeight < 10) formationHeight += 1;
-					}
-					if(baseSpeed-20 > -150)baseSpeed -= 20;
-					else baseSpeed = -150;
-					if(shootingFrecuency-300 > 300) shootingFrecuency -= 300;
-					else shootingFrecuency = 100;
-				}else if(level >= 5){
-					if(formationWidth == formationHeight){
-						if(formationWidth < 14) formationWidth += 2;
-					} else {
-						if(formationHeight < 10) formationHeight += 2;
-					}
-					if(baseSpeed-20 > -150)baseSpeed -= 20;
-					else baseSpeed = -150;
-					if(shootingFrecuency-400 > 400) shootingFrecuency -= 400;
-					else shootingFrecuency = 100;
-				}
-                yield new GameSettings(formationWidth, formationHeight, baseSpeed, shootingFrecuency);
-			}
-			default -> {
-				yield null;
-			}
+		}
+
+		// Adjust base speed based on level and difficulty
+		int speedDecrement = switch (difficulty) {
+			case 0 -> 10; // Easy
+			case 1 -> (level >= 5 ? 20 : 10); // Medium
+			case 2 -> 20; // Hard
+			default -> 0; // This case should not occur, but set to 0 for safety
 		};
+		baseSpeed = Math.max(-150, baseSpeed - speedDecrement);
+
+		// Adjust shooting frequency based on level and difficulty
+		int frequencyDecrement = switch (difficulty) {
+			case 0 -> 100; // Easy
+			case 1 -> (level >= 5 ? 300 : 200); // Medium
+			case 2 -> (level >= 5 ? 400 : 300); // Hard
+			default -> 0; // This case should not occur, but set to 0 for safety
+		};
+		shootingFrecuency = Math.max(100, shootingFrecuency - frequencyDecrement);
+
+		// Return the adjusted game settings
+		return new GameSettings(formationWidth, formationHeight, baseSpeed, shootingFrecuency);
 	}
 
 	/**
