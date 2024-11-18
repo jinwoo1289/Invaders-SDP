@@ -236,7 +236,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 		}
 
-// Method to set the enemy fleet
+        // Method to set the enemy fleet
 		private void setupEnemyFormation() {
 			enemyShipFormation = new EnemyShipFormation(this.gameSettings, this.gameState);
 			enemyShipFormation.attach(this);
@@ -249,7 +249,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 
 
-	// Method to create spider web
+		// Method to create spider web
 		private void createSpiderWebs() {
 			int webCount = 1 + level / 3;
 			web = new ArrayList<>();
@@ -260,7 +260,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			}
 		}
 
-	// Method to create a block
+	    // Method to create a block
 		private void createBlocks() {
 			int blockCount = level / 2;
 			int playerTopYContainBarrier = this.height - 190;
@@ -277,7 +277,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 
 
-	// Method to generate random blocks
+	    // Method to generate random blocks
 		private Block createRandomBlock(int maxY, int minY) {
 			int positionX = (int) (Math.random() * (this.width - 20*2));
 			int positionY = (int) minY;
@@ -285,7 +285,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 
 
-	// Method to check if a block overlaps another block
+	    // Method to check if a block overlaps another block
 		private boolean isOverlapping(Block newBlock) {
 			for (Block existingBlock : block) {
 				if (checkCollision(newBlock, existingBlock)) {
@@ -376,6 +376,10 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			handleEnemyShipSpecial();
 		}
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6dc884d (drawble)
 		    manageCollisions();
 			cleanBullets();
 
@@ -617,7 +621,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		drawManager.drawReloadTimer(this,this.ship,ship.getRemainingReloadTime());
 		drawManager.drawCombo(this,this.combo);
 
-
+        //handle countdown.
 		handleCountDown();
 
 
@@ -682,7 +686,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		// handle thread game over.
 		handleThreadGameOver();
 
-		// handle thread count down.
+		// handle thread countdown.
 		handleThreadCountDown();
 
 
@@ -789,7 +793,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 				itemBoxCollision(recyclable, bullet);
 
-				//check the collision between the obstacle and the bullet
 				bulletBlockCollision(recyclable, bullet);
 			}
 		}
