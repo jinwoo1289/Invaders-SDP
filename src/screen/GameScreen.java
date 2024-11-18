@@ -174,14 +174,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		this.tempScore = gameState.getPrevScore();
 
 		this.hitBullets = gameState.getHitBullets();
-
-		try {
-			this.highScores = Core.getFileManager().loadHighScores();
-
-		} catch (IOException e) {
-			logger.warning("Couldn't load high scores!");
-		}
-
 		this.wallet = wallet;
 
 
@@ -190,14 +182,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		this.blockerCooldown = Core.getVariableCooldown(10000, 14000);
 		this.blockerCooldown.reset();
 		this.blockerVisibleCooldown = Core.getCooldown(20000);
-
-		try {
-			this.highScores = Core.getFileManager().loadHighScores();
-		} catch (IOException e) {
-			logger.warning("Couldn't load high scores!");
-		}
-		this.alertMessage = "";
-
 		this.wallet = wallet;
 	}
 
@@ -569,9 +553,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			}
 		}
 
-
-		//add drawRecord method for drawing
-		drawManager.drawRecord(highScores,this);
 
 		drawManager.completeDrawing(this);
 	}

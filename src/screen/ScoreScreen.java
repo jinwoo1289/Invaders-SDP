@@ -16,8 +16,6 @@ import entity.Wallet;
  */
 public class ScoreScreen extends Screen {
 
-	/** Maximum number of high scores. */
-	private static final int MAX_HIGH_SCORE_NUM = 3;
 	/** Singleton instance of SoundManager */
 	private final SoundManager soundManager = SoundManager.getInstance();
 
@@ -30,8 +28,7 @@ public class ScoreScreen extends Screen {
 	private int bulletsShot;
 	/** Total ships destroyed by the player. */
 	private int shipsDestroyed;
-	/** List of past high scores. */
-	private List<Score> highScores;
+
 	/** Checks if current score is a new high score. */
 	private double accuracy;
 	private boolean isNewRecord;
@@ -89,11 +86,6 @@ public class ScoreScreen extends Screen {
 
 		soundManager.loopSound(Sound.BGM_GAMEOVER);
 
-		try {
-			this.highScores = Core.getFileManager().loadHighScores();
-		} catch (IOException e) {
-			logger.warning("Couldn't load high scores!");
-		}
 	}
 
 	/**
@@ -121,61 +113,16 @@ public class ScoreScreen extends Screen {
 				this.isRunning = false;
 				soundManager.stopSound(Sound.BGM_GAMEOVER);
 				soundManager.playSound(Sound.MENU_BACK);
-				saveScore();
 			} else if (inputManager.isKeyDown(KeyEvent.VK_SPACE)) {
 				// Play again.
 				this.returnCode = isMultiplay ? 8 : 2;
 				this.isRunning = false;
 				soundManager.stopSound(Sound.BGM_GAMEOVER);
 				soundManager.playSound(Sound.MENU_CLICK);
-				saveScore();
 			}
 
 		}
 
-	}
-
-	/**
-	 * Saves the score as a high score.
-	 * 중복 방지를 위한 로직 추가.
-	 */
-	private void saveScore() {
-		if (highScores.size() > MAX_HIGH_SCORE_NUM) {
-			int index = 0;
-			for (Score loadScore : highScores) {
-				if (name1.equals(loadScore.getName())) {
-					if (score > loadScore.getScore()) {
-						highScores.remove(index);
-						highScores.add(new Score(name1, score));
-						break;
-					}
-				}
-				index += 1;
-			}
-		} else {
-			boolean checkDuplicate = false;
-			int index = 0;
-			for (Score loadScore : highScores) {
-				if (name1.equals(loadScore.getName())) {
-					checkDuplicate = true;
-					if (score > loadScore.getScore()) {
-						highScores.remove(index);
-						highScores.add(new Score(name1, score));
-						break;
-					}
-				}
-				index += 1;
-			}
-			if (!checkDuplicate) {
-				highScores.add(new Score(name1, score));
-			}
-		}
-		Collections.sort(highScores);
-		try {
-			Core.getFileManager().saveHighScores(highScores);
-		} catch (IOException e) {
-			logger.warning("Couldn't load high scores!");
-		}
 	}
 
 	/**
@@ -186,7 +133,7 @@ public class ScoreScreen extends Screen {
 
 		drawManager.drawGameOver(this, this.inputDelay.checkFinished(),
 				this.isNewRecord);
-		drawManager.drawResults(this, this.score, this.livesRemaining,
+		drawManager.drawResults(this, this.livesRemaining,
 				this.shipsDestroyed, this.accuracy, this.isNewRecord, this.coinsEarned);
 
 		drawManager.completeDrawing(this);

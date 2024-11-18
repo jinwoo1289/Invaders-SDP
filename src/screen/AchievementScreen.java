@@ -44,12 +44,6 @@ public class AchievementScreen extends Screen {
 		super(width, height, fps);
 
 		this.returnCode = 1;
-
-		try {
-			this.highScores = Core.getFileManager().loadHighScores();
-		} catch (NumberFormatException | IOException e) {
-			logger.warning("Couldn't load high scores!");
-		}
 		try {
 			this.totalScore = Core.getFileManager().loadAchievement().getTotalScore();
 		} catch (NumberFormatException | IOException e) {
@@ -111,7 +105,6 @@ public class AchievementScreen extends Screen {
 		drawManager.drawAchievementMenu(this, this.totalScore, this.totalPlayTime,
 				this.maxCombo, this.currentPerfectStage, this.currentPerfectStage+1,
 				this.checkFlawlessFailure);
-		drawManager.drawHighScores(this, this.highScores);
 		drawManager.completeDrawing(this);
 	}
 }
