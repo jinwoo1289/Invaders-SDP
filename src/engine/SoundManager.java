@@ -21,7 +21,7 @@ public class SoundManager {
     /** Sound manager activation flag */
     private boolean soundEnabled;
     /** Value of current volume */
-    private static int currentVolume = 5;
+    private static int currentVolume = 10;
     /** Maximum and minimum values of volume */
     private final float MIN_VOL = -80.0f;
     private final float MAX_VOL = 6.0f;

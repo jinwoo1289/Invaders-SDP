@@ -117,6 +117,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	/* Is Blocker visible */
 	private boolean blockerVisible;
 	private Random random;
+	private List<Blocker> blockers = new ArrayList<>();
 	/** Singleton instance of SoundManager */
 	private final SoundManager soundManager = SoundManager.getInstance();
 	/** Singleton instance of ItemManager. */
@@ -573,6 +574,14 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		//add drawRecord method for drawing
 		drawManager.drawRecord(highScores,this);
 
+
+		// Blocker drawing part
+		if (!blockers.isEmpty()) {
+			for (Blocker blocker : blockers) {
+				drawManager.drawRotatedEntity(blocker, blocker.getPositionX(), blocker.getPositionY(), blocker.getAngle());
+			}
+		}
+
 		drawManager.completeDrawing(this);
 	}
 
@@ -598,6 +607,43 @@ public class GameScreen extends Screen implements Callable<GameState> {
 				break;
 		}
 
+		// Check number of blockers, check timing of exit
+		if (blockers.size() < MAX_BLOCKERS && blockerCooldown.checkFinished()) {
+			boolean moveLeft = random.nextBoolean(); // Randomly sets the movement direction of the current blocker
+			int startY = random.nextInt(this.height - 90) + 25; // Random Y position with margins at the top and bottom of the screen
+			int startX = moveLeft ? this.width + 300 : -300; // If you want to move left, outside the right side of the screen, if you want to move right, outside the left side of the screen.
+			// Add new Blocker
+			if (moveLeft) {
+				blockers.add(new Blocker(startX, startY, newSprite, moveLeft)); // move from right to left
+			} else {
+				blockers.add(new Blocker(startX, startY, newSprite, moveLeft)); // move from left to right
+			}
+			blockerCooldown.reset();
+		}
+
+		// Items in the blocker list that will disappear after leaving the screen
+		List<Blocker> toRemove = new ArrayList<>();
+		for (int i = 0; i < blockers.size(); i++) {
+			Blocker blocker = blockers.get(i);
+
+			// If the blocker leaves the screen, remove it directly from the list.
+			if (blocker.getMoveLeft() && blocker.getPositionX() < -300 || !blocker.getMoveLeft() && blocker.getPositionX() > this.width + 300) {
+				blockers.remove(i);
+				i--; // When an element is removed from the list, the index must be decreased by one place.
+				continue;
+			}
+
+			// Blocker movement and rotation (positionX, Y value change)
+			if (blocker.getMoveLeft()) {
+				blocker.move(-1.5, 0); // move left
+			} else {
+				blocker.move(1.5, 0); // move right
+			}
+			blocker.rotate(0.2); // Blocker rotation
+		}
+
+		// Remove from the blocker list that goes off screen
+		blockers.removeAll(toRemove);
 	}
 
 	/**
@@ -684,6 +730,14 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 		//add drawRecord method for drawing
 		drawManager.drawRecord(highScores,this, playerNumber);
+
+		// Blocker drawing part
+		if (!blockers.isEmpty()) {
+			for (Blocker blocker : blockers) {
+				drawManager.drawRotatedEntity(blocker, blocker.getPositionX(), blocker.getPositionY(), blocker.getAngle(), playerNumber);
+			}
+		}
+
 		drawManager.flushBuffer(this, playerNumber);
 	}
 
