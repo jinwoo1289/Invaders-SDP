@@ -83,7 +83,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	private long gameStartTime;
 	/** Checks if the level is finished. */
 	private boolean levelFinished;
-	/** Checks if a bonus life is received. */
+	/** Checks if a bonus life is received. **/
 	private boolean bonusLife;
 	/** Player number for two player mode **/
 	private int playerNumber;
