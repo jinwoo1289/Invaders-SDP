@@ -3,7 +3,7 @@ package entity;
 import java.awt.Color;
 
 import engine.DrawManager.SpriteType;
-import engine.Drawable;
+
 
 /**
  * Implements a generic game entity.
@@ -11,7 +11,7 @@ import engine.Drawable;
  * @author <a href="mailto:RobertoIA1987@gmail.com">Roberto Izquierdo Amo</a>
  * 
  */
-public class Entity implements Drawable {
+public class Entity {
 
 	/** Position in the x-axis of the upper left corner of the entity. */
 	protected int positionX;
