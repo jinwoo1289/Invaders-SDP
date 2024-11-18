@@ -574,12 +574,7 @@ public final class DrawManager {
 	 *            X coordinate of the line.
 	 */
 
-	public void drawLaunchTrajectory(final Screen screen, final int positionX) {
-		backBufferGraphics.setColor(Color.DARK_GRAY);
-		for (int i = 0; i < screen.getHeight() - 140; i += 20){
-			backBufferGraphics.drawRect(positionX + 13, screen.getHeight() - 100 - i,1,10);
-		}
-    }
+
 	/**
 	 * Draws launch trajectory on screen.
 	 *

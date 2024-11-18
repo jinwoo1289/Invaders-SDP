@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.Timer;
@@ -105,7 +104,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	/**
 	 * Obstacles preventing a player's bullet
 	 */
-	private List<Block> block;
+	private Set<Block> block;
 
 	private Wallet wallet;
 	/** Singleton instance of SoundManager */
@@ -262,7 +261,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			int blockCount = level / 2;
 			int playerTopYContainBarrier = this.height - 190;
 			int enemyBottomY = 100 + (gameSettings.getFormationHeight() - 1) * 48;
-			block = new ArrayList<>();
+			block = new HashSet<>();
 
 			for (int i = 0; i < blockCount; i++) {
 				Block newBlock;
@@ -277,7 +276,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	    // Method to generate random blocks
 		private Block createRandomBlock(int maxY, int minY) {
 			int positionX = (int) (Math.random() * (this.width - 20*2));
-			int positionY = (int) minY;
+			int positionY = (int) (Math.random() * (maxY - minY)) + minY;
 			return new Block(positionX, positionY);
 		}
 
@@ -581,13 +580,13 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	private void draw() {
 		drawManager.initDrawing(this);
 		drawManager.drawGameTitle(this);
-		drawManager.drawLaunchTrajectory( this,this.ship.getPositionX());
 		//draw entities.
 		drawManager.drawEntity(this.ship, this.ship.getPositionX(), this.ship.getPositionY());
 
 		drawManager.drawEntities(itemBoxes);
 		drawManager.drawEntities(barriers);
 		drawManager.drawEntities(bullets);
+		drawManager.drawEntities(block);
 
 		for (int i = 0; i < web.size(); i++) {
 			drawManager.drawEntity(this.web.get(i), this.web.get(i).getPositionX(),
@@ -663,6 +662,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		drawManager.drawEntities(itemBoxes, playerNumber);
 		drawManager.drawEntities(barriers, playerNumber);
 		drawManager.drawEntities(bullets, playerNumber);
+		drawManager.drawEntities(block, playerNumber);
 
 		for (int i = 0; i < web.size(); i++) {
 			drawManager.drawEntity(this.web.get(i), this.web.get(i).getPositionX(),
