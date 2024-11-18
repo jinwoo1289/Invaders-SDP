@@ -376,10 +376,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			handleEnemyShipSpecial();
 		}
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 6dc884d (drawble)
 		    manageCollisions();
 			cleanBullets();
 
@@ -424,10 +420,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			this.enemyShipFormation.update();
 			this.enemyShipFormation.shoot(this.bullets, this.level, balance);
 		}
-<<<<<<< HEAD
-=======
-
->>>>>>> 9773635 (blocker)
 	}
 
 	private void SpiderWebInteraction() {
@@ -632,10 +624,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		//add drawRecord method for drawing
 		drawManager.drawRecord(highScores,this);
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 9773635 (blocker)
 		drawManager.completeDrawing(this);
 	}
 
@@ -664,10 +652,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	}
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 9773635 (blocker)
 	/**
 	 * Draws the elements associated with the screen to thread buffer.
 	 */
@@ -715,11 +699,8 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 		//add drawRecord method for drawing
 		drawManager.drawRecord(highScores,this, playerNumber);
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 9773635 (blocker)
 		drawManager.flushBuffer(this, playerNumber);
 
 
