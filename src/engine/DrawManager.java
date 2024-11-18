@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
@@ -331,6 +332,19 @@ public final class DrawManager {
                     threadBufferGraphics[threadNumber].drawRect(positionX + i * 2, positionY
                             + j * 2, 1, 1);
     }
+
+	public <T extends Entity> void drawEntities(Set<T> entities) {
+		for (T entity : entities) {
+			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
+		}
+	}
+
+	public <T extends Entity> void drawEntities(Set<T> entities, final int threadNumber ) {
+		for (T entity : entities) {
+			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
+		}
+	}
+
 	/**
 	 * For debugging purposes, draws the canvas borders.
 	 * 
@@ -1386,6 +1400,7 @@ public final class DrawManager {
                 case Ship.ShipType.StarDefender -> 360 * (int) remainingTime / (int) (750 * 1.0);
                 case Ship.ShipType.GalacticGuardian -> 360 * (int) remainingTime / (int) (750 * 1.2);
             };
+
             backBufferGraphics.fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
 					circleSize, circleSize, 90, endAngle);
 		}
