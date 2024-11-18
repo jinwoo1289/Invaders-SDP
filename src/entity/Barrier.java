@@ -4,9 +4,9 @@ import java.awt.Color;
 import engine.DrawManager.SpriteType;
 import engine.Sound;
 import engine.SoundManager;
-import engine.Drawable;
 
-public class Barrier extends Entity implements Drawable {
+
+public class Barrier extends Entity {
 
     private int health;
 
