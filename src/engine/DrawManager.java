@@ -779,10 +779,9 @@ public final class DrawManager {
 	 * @param isNewRecord
 	 *            If the score is a new high score.
 	 */
-	public void drawResults(final Screen screen, final int score,
+	public void drawResults(final Screen screen,
 			final int livesRemaining, final int shipsDestroyed,
 			final double accuracy, final boolean isNewRecord, final int coinsEarned) {
-		String scoreString = String.format("score %04d", score);
 		String livesRemainingString = "lives remaining " + livesRemaining;
 		String shipsDestroyedString = "enemies destroyed " + shipsDestroyed;
 		String accuracyString = String
@@ -791,9 +790,6 @@ public final class DrawManager {
 
 		int height = isNewRecord ? 4 : 2;
 
-		backBufferGraphics.setColor(Color.WHITE);
-		drawCenteredRegularString(screen, scoreString, screen.getHeight()
-				/ height);
 		drawCenteredRegularString(screen, livesRemainingString,
 				screen.getHeight() / height + fontRegularMetrics.getHeight()
 						* 2);
@@ -1107,35 +1103,6 @@ public final class DrawManager {
 	}
 
 	/**
-	 * Draws high scores.
-	 * 
-	 * @param screen
-	 *            Screen to draw on.
-	 * @param highScores
-	 *            List of high scores.
-	 */
-	public void drawHighScores(final Screen screen,
-			final List<Score> highScores) {
-		backBufferGraphics.setColor(Color.WHITE);
-		int i = 0;
-		String scoreString = "";
-
-		final int limitDrawingScore = 3;
-		int countDrawingScore = 0;
-		for (Score score : highScores) {
-			scoreString = String.format("%s        %04d", score.getName(),
-					score.getScore());
-			drawLeftSideScoreRegularString(screen, scoreString, screen.getHeight()
-					/ 4 + fontRegularMetrics.getHeight() * (i + 1) * 2);
-			i++;
-			countDrawingScore++;
-			if(countDrawingScore>=limitDrawingScore){
-				break;
-			}
-		}
-	}
-
-	/**
 	 * Draws a centered string on small font.
 	 *
 	 * @param screen
@@ -1374,15 +1341,6 @@ public final class DrawManager {
 		//add variable for highest score
 		int highestScore = -1;
 		String highestPlayer = "";
-
-		// find the highest score from highScores list
-		for (Score entry : highScores) {
-			if (entry.getScore() > highestScore) {
-				highestScore = entry.getScore();
-				highestPlayer = entry.getName();
-			}
-		}
-
 
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.LIGHT_GRAY);
