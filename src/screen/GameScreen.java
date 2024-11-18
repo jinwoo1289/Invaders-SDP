@@ -108,7 +108,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	private List<Block> block;
 
 	private Wallet wallet;
-	private Random random;
 	/** Singleton instance of SoundManager */
 	private final SoundManager soundManager = SoundManager.getInstance();
 	/** Singleton instance of ItemManager. */
@@ -119,8 +118,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	private Set<Barrier> barriers;
 	/** Sound balance for each player*/
 	private float balance = 0.0f;
-
-	private int MAX_BLOCKERS = 0;
 
 	private GameState gameState;
 
