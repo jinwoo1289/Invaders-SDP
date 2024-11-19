@@ -801,7 +801,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 
 		// remove crashed obstacle
-		block.removeAll(removableBlocks);
+		blocks.removeAll(removableBlocks);
 		this.bullets.removeAll(recyclable);
 		BulletPool.recycle(recyclable);
 	}
@@ -890,7 +890,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 	}
 	private void bulletBlockCollision(Set<Bullet> recyclable, Bullet bullet) {
-		for (Block block : this.block) {
+		for (Block block : this.blocks) {
 			if (checkCollision(bullet, block)) {
 				recyclable.add(bullet);
 				soundManager.playSound(Sound.BULLET_BLOCKING, balance);
