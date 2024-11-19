@@ -35,6 +35,9 @@ public class GameSettingScreen extends Screen {
 
 		this.selectionCooldown = Core.getCooldown(SELECTION_TIME);
 		this.selectionCooldown.reset();
+
+		while (!this.selectionCooldown.checkFinished()) {
+		}
 	}
 
 	public final int run() {
