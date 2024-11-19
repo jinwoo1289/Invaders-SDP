@@ -104,7 +104,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	/**
 	 * Obstacles preventing a player's bullet
 	 */
-	private Set<Block> block;
+	private Set<Block> blocks;
 
 	private Wallet wallet;
 	/** Singleton instance of SoundManager */
@@ -261,14 +261,14 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			int blockCount = level / 2;
 			int playerTopYContainBarrier = this.height - 190;
 			int enemyBottomY = 100 + (gameSettings.getFormationHeight() - 1) * 48;
-			block = new HashSet<>();
+			blocks = new HashSet<>();
 
 			for (int i = 0; i < blockCount; i++) {
 				Block newBlock;
 				do {
 					newBlock = createRandomBlock(playerTopYContainBarrier, enemyBottomY);
 				} while (isOverlapping(newBlock));
-				block.add(newBlock);
+				blocks.add(newBlock);
 			}
 		}
 
@@ -283,7 +283,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 	    // Method to check if a block overlaps another block
 		private boolean isOverlapping(Block newBlock) {
-			for (Block existingBlock : block) {
+			for (Block existingBlock : blocks) {
 				if (checkCollision(newBlock, existingBlock)) {
 					return true;
 				}
@@ -586,7 +586,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		drawManager.drawEntities(itemBoxes);
 		drawManager.drawEntities(barriers);
 		drawManager.drawEntities(bullets);
-		drawManager.drawEntities(block);
+		drawManager.drawEntities(blocks);
 
 		for (int i = 0; i < web.size(); i++) {
 			drawManager.drawEntity(this.web.get(i), this.web.get(i).getPositionX(),
@@ -662,7 +662,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		drawManager.drawEntities(itemBoxes, playerNumber);
 		drawManager.drawEntities(barriers, playerNumber);
 		drawManager.drawEntities(bullets, playerNumber);
-		drawManager.drawEntities(block, playerNumber);
+		drawManager.drawEntities(blocks, playerNumber);
 
 		for (int i = 0; i < web.size(); i++) {
 			drawManager.drawEntity(this.web.get(i), this.web.get(i).getPositionX(),
@@ -797,7 +797,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 
 		// remove crashed obstacle
-		block.removeAll(removableBlocks);
+		blocks.removeAll(removableBlocks);
 		this.bullets.removeAll(recyclable);
 		BulletPool.recycle(recyclable);
 	}
@@ -886,7 +886,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 	}
 	private void bulletBlockCollision(Set<Bullet> recyclable, Bullet bullet) {
-		for (Block block : this.block) {
+		for (Block block : this.blocks) {
 			if (checkCollision(bullet, block)) {
 				recyclable.add(bullet);
 				soundManager.playSound(Sound.BULLET_BLOCKING, balance);
@@ -898,7 +898,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		//check the collision between the obstacle and the enemyship
 		for (EnemyShip enemyShip : this.enemyShipFormation) {
 			if (enemyShip != null && !enemyShip.isDestroyed()) {
-				for (Block block : block) {
+				for (Block block : blocks) {
 					if (checkCollision(enemyShip, block)) {
 						removableBlocks.add(block);
 					}
