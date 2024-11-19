@@ -372,6 +372,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			handleEnemyShipSpecial();
 		}
 
+
 		    manageCollisions();
 			cleanBullets();
 
@@ -416,6 +417,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			this.enemyShipFormation.update();
 			this.enemyShipFormation.shoot(this.bullets, this.level, balance);
 		}
+
 	}
 
 	private void SpiderWebInteraction() {
@@ -620,6 +622,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		//add drawRecord method for drawing
 		drawManager.drawRecord(highScores,this);
 
+
 		drawManager.completeDrawing(this);
 	}
 
@@ -646,6 +649,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 
 	}
+
 
 
 	/**
@@ -797,7 +801,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 
 		// remove crashed obstacle
-		blocks.removeAll(removableBlocks);
+		block.removeAll(removableBlocks);
 		this.bullets.removeAll(recyclable);
 		BulletPool.recycle(recyclable);
 	}
@@ -886,7 +890,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 	}
 	private void bulletBlockCollision(Set<Bullet> recyclable, Bullet bullet) {
-		for (Block block : this.blocks) {
+		for (Block block : this.block) {
 			if (checkCollision(bullet, block)) {
 				recyclable.add(bullet);
 				soundManager.playSound(Sound.BULLET_BLOCKING, balance);
