@@ -8,90 +8,46 @@ import engine.*;
 
 import java.awt.event.KeyEvent;
 
-/**
- * Implements the game setting screen.
- *
- * @author <a href="mailto:dayeon.dev@gmail.com">Dayeon Oh</a>
- *
- */
 public class GameSettingScreen extends Screen {
 	private static GameSettingScreen instance;
 
-	/** Milliseconds between changes in user selection. */
 	private static final int SELECTION_TIME = 200;
-	/** Maximum number of characters for player name.
-	 * draw를 용이하게 하기 위해 NAME_LIMIT을 4로 제한 */
 	private static final int NAME_LIMIT = 4;
 
-
-	/** Player name1 for record input. */
 	private static String name1;
-	/** Player name2 for record input. */
 	private static String name2;
-	/** Multiplayer mode. */
 	private static boolean isMultiplayer = false;
-	/** Difficulty level. */
 	private int difficultyLevel;
-	/** Selected row. */
 	private int selectedRow;
-	/** Time between changes in user selection. */
 	private final Cooldown selectionCooldown;
 
-	/** Total number of rows for selection. */
-	private static final int TOTAL_ROWS = 3; // Multiplayer, Difficulty, Start
+	private static final int TOTAL_ROWS = 3;
 
-	/** Singleton instance of SoundManager */
 	private final SoundManager soundManager = SoundManager.getInstance();
 
-	/**
-	 * Constructor, establishes the properties of the screen.
-	 *
-	 * @param width
-	 *            Screen width.
-	 * @param height
-	 *            Screen height.
-	 * @param fps
-	 *            Frames per second, frame rate at which the game is run.
-	 */
 	public GameSettingScreen(final int width, final int height, final int fps) {
 		super(width, height, fps);
-
-		// row 0: multiplayer
 		this.name1 = "P1";
 		this.name2 = "P2";
 		this.isMultiplayer = false;
-
-		// row 1: difficulty level
-		this.difficultyLevel = 1; 	// 0: easy, 1: normal, 2: hard
-
-		// row 3: start
-
+		this.difficultyLevel = 1;
 		this.selectedRow = 0;
 
 		this.selectionCooldown = Core.getCooldown(SELECTION_TIME);
 		this.selectionCooldown.reset();
 	}
 
-	/**
-	 * Starts the action.
-	 *
-	 * @return Next screen code.
-	 */
 	public final int run() {
 		super.run();
-
 		return this.returnCode;
 	}
 
-	/**
-	 * Updates the elements on screen and checks for events.
-	 */
 	protected final void update() {
 		super.update();
-
 		draw();
+
 		if (this.inputDelay.checkFinished() && this.selectionCooldown.checkFinished()) {
-			if (inputManager.isKeyDown(KeyEvent.VK_UP)){
+			if (inputManager.isKeyDown(KeyEvent.VK_UP)) {
 				this.selectedRow = (this.selectedRow - 1 + TOTAL_ROWS) % TOTAL_ROWS;
 				this.selectionCooldown.reset();
 				soundManager.playSound(Sound.MENU_MOVE);
@@ -142,27 +98,19 @@ public class GameSettingScreen extends Screen {
 				}
 			} else if (this.selectedRow == 2) {
 				if (inputManager.isKeyDown(KeyEvent.VK_SPACE)) {
-					this.returnCode = isMultiplayer ? 8: 2;
+					this.returnCode = isMultiplayer ? 8 : 2;
 					this.isRunning = false;
 					soundManager.playSound(Sound.MENU_CLICK);
 				}
 			}
 			if (inputManager.isKeyDown(KeyEvent.VK_ESCAPE)) {
-				// Return to main menu.
 				this.returnCode = 1;
 				this.isRunning = false;
 				soundManager.playSound(Sound.MENU_BACK);
 			}
 		}
-
 	}
 
-	/**
-	 * Handles the input for player name.
-	 *
-	 * @param inputManager
-	 *            Input manager.
-	 */
 	private void handleNameInput(InputManager inputManager) {
 		for (int keyCode = KeyEvent.VK_A; keyCode <= KeyEvent.VK_Z; keyCode++) {
 			if (inputManager.isKeyDown(keyCode)) {
@@ -172,7 +120,7 @@ public class GameSettingScreen extends Screen {
 						this.selectionCooldown.reset();
 						soundManager.playSound(Sound.MENU_TYPING);
 					}
-				} else{
+				} else {
 					if (this.name1.length() < NAME_LIMIT) {
 						this.name1 += (char) keyCode;
 						this.selectionCooldown.reset();
@@ -182,37 +130,61 @@ public class GameSettingScreen extends Screen {
 			}
 		}
 	}
+
 	public static GameSettingScreen getInstance() {
 		if (instance == null) {
-			instance = new GameSettingScreen(0,0,0);
+			instance = new GameSettingScreen(0, 0, 0);
 		}
 		return instance;
 	}
-	public static boolean getMultiPlay() {return isMultiplayer; }
 
-	/**
-	 * Get player's name by number
-	 *
-	 * @param playerNumber
-	 * 			Player's number
-	 * @return Player's name
-	 */
-	public static String getName(int playerNumber) { return playerNumber == 0 ? name1 : name2; }
+	public static boolean getMultiPlay() {
+		return isMultiplayer;
+	}
 
-	/**
-	 * Draws the elements associated with the screen.
-	 */
+	public static String getName(int playerNumber) {
+		return playerNumber == 0 ? name1 : name2;
+	}
+
+	public void setMultiplayer(boolean multiplayer) {
+		isMultiplayer = multiplayer;
+	}
+
+	public void setDifficultyLevel(int level) {
+		this.difficultyLevel = level;
+	}
+
+	public Cooldown getSelectionCooldown() {
+		return this.selectionCooldown;
+	}
+
+	public void setName(int playerNumber, String name) {
+		if (playerNumber == 0) {
+			name1 = name;
+		} else if (playerNumber == 1) {
+			name2 = name;
+		}
+	}
+
+	public void setSelectedRow(int row) {
+		this.selectedRow = row;
+	}
+
+	public Object getField(String fieldName) {
+		return switch (fieldName.toLowerCase()) {
+			case "difficulty" -> this.difficultyLevel;
+			case "row" -> this.selectedRow;
+			case "multiplayer" -> this.isMultiplayer;
+			default -> null;
+		};
+	}
+
 	private void draw() {
 		drawManager.initDrawing(this);
-
 		drawManager.drawGameSetting(this);
-
 		drawManager.drawGameSettingRow(this, this.selectedRow);
-
-		drawManager.drawGameSettingElements(this, this.selectedRow, isMultiplayer, name1, name2,this.difficultyLevel);
-
+		drawManager.drawGameSettingElements(this, this.selectedRow, isMultiplayer, name1, name2, this.difficultyLevel);
 		drawManager.completeDrawing(this);
-
 		Core.setLevelSetting(this.difficultyLevel);
 	}
 }
