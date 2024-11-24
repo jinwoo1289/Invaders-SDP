@@ -47,9 +47,9 @@ public final class DrawManager {
 	private static Font fontSmall;
 	/** Small sized font properties. */
 	private static FontMetrics fontSmallMetrics;
-	/** Normal sized font. */
+	/** Normal-sized font. */
 	private static Font fontRegular;
-	/** Normal sized font properties. */
+	/** Normal-sized font properties. */
 	private static FontMetrics fontRegularMetrics;
 	/** Big sized font. */
 	private static Font fontBig;
@@ -309,6 +309,9 @@ public final class DrawManager {
 							+ j * 2, 1, 1);
 	}
 
+
+
+
     /**
      * Draws an entity, using the appropriate image.
      *
@@ -378,12 +381,10 @@ public final class DrawManager {
 	}
 
 	/**
-	 * Draws current score on screen.
+	 * Draws the current score on the screen.
 	 *
-	 * @param screen
-	 *            Screen to draw on.
-	 * @param score
-	 *            Current score.
+	 * @param screen The screen object where the score will be displayed.
+	 * @param score  The current score to be displayed.
 	 */
 	public void drawScore(final Screen screen, final int score) {
 		backBufferGraphics.setFont(fontRegular);
@@ -1005,11 +1006,11 @@ public final class DrawManager {
 						screen.getHeight() / 2 + fontRegularMetrics.getHeight() * 5 + 5);
 			} else {
 				backBufferGraphics.setColor(Color.orange);
-				drawRightSideAchievementCoinBigString(screen, ACCURACY_COIN_REWARD[maxCombo <= 9 ? 0 : maxCombo / 5 - 1],
+				drawRightSideAchievementCoinBigString(screen, ACCURACY_COIN_REWARD[maxCombo / 5 - 1],
 						screen.getHeight() / 2 + fontRegularMetrics.getHeight() * 2 + fontBigMetrics.getHeight() * 2);
 
 				backBufferGraphics.setColor(Color.WHITE);
-				String accuracyAchievement = String.format("             %d", maxCombo) + " =>" + String.format("         %d", maxCombo <= 9 ? 10 : (((( (maxCombo - 10) / 5) + 1) * 5 ) + 10));
+				String accuracyAchievement = String.format("             %d", maxCombo) + " =>" + String.format("         %d", ((maxCombo - 10) / 5 + 1) * 5 + 10);
 				drawRightSideAchievementBigString(screen, accuracyAchievement,
 						screen.getHeight() / 2 + fontRegularMetrics.getHeight() * 5 + 5);
 			}

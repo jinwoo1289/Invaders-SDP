@@ -2,11 +2,10 @@ package entity;
 
 import engine.DrawManager.SpriteType;
 
-
 import java.awt.*;
 
 
-public class Block extends Entity {
+public class Block extends Entity{
     /**
      * Constructor, establishes the entity's generic properties.
      *

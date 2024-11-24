@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import engine.DrawManager.SpriteType;
 
-
 /**
  * Implements a generic game entity.
  * 
