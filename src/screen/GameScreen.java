@@ -163,14 +163,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 		this.hitBullets = gameState.getHitBullets();
 		this.wallet = wallet;
-
-
-		this.random = new Random();
-		this.blockerVisible = false;
-		this.blockerCooldown = Core.getVariableCooldown(10000, 14000);
-		this.blockerCooldown.reset();
-		this.blockerVisibleCooldown = Core.getCooldown(20000);
-		this.wallet = wallet;
 	}
 
 	/**
@@ -641,30 +633,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 
 
 		drawManager.completeDrawing(this);
-	}
-
-
-	// Methods that handle the position, angle, sprite, etc. of the blocker (called repeatedly in update.)
-	private void handleBlockerAppearance() {
-
-		if (level >= 3 && level < 6) MAX_BLOCKERS = 1;
-		else if (level >= 6 && level < 11) MAX_BLOCKERS = 2;
-		else if (level >= 11) MAX_BLOCKERS = 3;
-
-		int kind = random.nextInt(2-1 + 1) +1; // 1~2
-		DrawManager.SpriteType newSprite;
-		switch (kind) {
-			case 1:
-				newSprite = DrawManager.SpriteType.Blocker1; // artificial satellite
-				break;
-			case 2:
-				newSprite = DrawManager.SpriteType.Blocker2; // astronaut
-				break;
-			default:
-				newSprite = DrawManager.SpriteType.Blocker1;
-				break;
-		}
-
 	}
 
 	/**
