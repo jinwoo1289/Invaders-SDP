@@ -67,7 +67,7 @@ public final class FileManager {
 	 */
 	public void loadSprite(final Map<SpriteType, boolean[][]> spriteMap) throws IOException {
         try (InputStream inputStream = DrawManager.class.getClassLoader().getResourceAsStream("graphics");
-			 BufferedReader reader = inputStream != null ? new BufferedReader(new InputStreamReader(inputStream)) : null) {
+             BufferedReader reader = inputStream != null ? new BufferedReader(new InputStreamReader(inputStream)) : null) {
 
 			if (reader == null)
 				throw new IOException("Graphics file not found.");
