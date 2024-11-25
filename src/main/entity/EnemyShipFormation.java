@@ -92,7 +92,7 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 	/** List of ships that are able to shoot. */
 	private List<EnemyShip> shooters;
 	/** Number of not destroyed ships. */
-	private int shipCount;
+    public int shipCount;
 
 	private int point = 0;
 
@@ -100,7 +100,12 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 
 	private GameState gameState;
 
-	/** Directions the formation can move. */
+    public EnemyShip getEnemyShip() {
+		EnemyShip enemyShip = enemyShips.get(0).get(0);
+		return enemyShip;
+    }
+
+    /** Directions the formation can move. */
 	private enum Direction {
 		/** Movement to the right side of the screen. */
 		RIGHT,
