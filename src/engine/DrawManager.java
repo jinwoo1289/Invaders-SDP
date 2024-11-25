@@ -5,19 +5,17 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 import entity.*;
-import screen.GameSettingScreen;
 import screen.Screen;
 
 /**
@@ -49,9 +47,9 @@ public final class DrawManager {
 	private static Font fontSmall;
 	/** Small sized font properties. */
 	private static FontMetrics fontSmallMetrics;
-	/** Normal sized font. */
+	/** Normal-sized font. */
 	private static Font fontRegular;
-	/** Normal sized font properties. */
+	/** Normal-sized font properties. */
 	private static FontMetrics fontRegularMetrics;
 	/** Big sized font. */
 	private static Font fontBig;
@@ -105,10 +103,6 @@ public final class DrawManager {
 		Web,
 		/** Obstacles preventing a player's bullet */
 		Block,
-		/** Obstruction 1 (satellite) */
-		Blocker1,
-		/** Obstruction 2 (Astronaut) */
-		Blocker2,
         /** 2nd player ship. */
         Ship2,
         /** 3rd player ship. */
@@ -125,7 +119,7 @@ public final class DrawManager {
 		EnemyShipE2,
 		/** Elite enemy ship - first form. */
 		EnemyShipF1
-	};
+	}
 
 	/**
 	 * Private constructor.
@@ -154,8 +148,6 @@ public final class DrawManager {
 			spriteMap.put(SpriteType.ItemBox, new boolean[7][7]);
 			spriteMap.put(SpriteType.Web, new boolean[12][8]);
 			spriteMap.put(SpriteType.Block, new boolean[20][7]);
-			spriteMap.put(SpriteType.Blocker1, new boolean[182][93]); // artificial satellite
-			spriteMap.put(SpriteType.Blocker2, new boolean[82][81]); // astronaut
 			spriteMap.put(SpriteType.Ship2, new boolean[13][8]);
 			spriteMap.put(SpriteType.Ship3, new boolean[13][8]);
 			spriteMap.put(SpriteType.Ship4, new boolean[13][8]);
@@ -317,6 +309,9 @@ public final class DrawManager {
 							+ j * 2, 1, 1);
 	}
 
+
+
+
     /**
      * Draws an entity, using the appropriate image.
      *
@@ -341,40 +336,16 @@ public final class DrawManager {
                             + j * 2, 1, 1);
     }
 
-	//Drawing an Entity (Blocker) that requires angle setting
-	public void drawRotatedEntity(Entity entity, int x, int y, double angle) {
-		Graphics2D g2d = (Graphics2D) backBufferGraphics; // Convert to Graphics2D
-		AffineTransform oldTransform = g2d.getTransform(); // Save previous conversion
-
-		//Set center point to rotate
-		int centerX = x + entity.getWidth() / 2;
-		int centerY = y + entity.getHeight() / 2;
-
-		//rotate by a given angle
-		g2d.rotate(Math.toRadians(angle), centerX, centerY);
-
-		//Drawing entities
-		drawEntity(entity, x, y);
-
-		g2d.setTransform(oldTransform); // Restore to original conversion state
+	public <T extends Entity> void drawEntities(Set<T> entities) {
+		for (T entity : entities) {
+			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
+		}
 	}
 
-	//Drawing an Entity (Blocker) that requires angle setting
-	public void drawRotatedEntity(Entity entity, int x, int y, double angle, final int threadNumber) {
-		Graphics2D g2d = (Graphics2D) threadBufferGraphics[threadNumber]; // Convert to Graphics2D
-		AffineTransform oldTransform = g2d.getTransform(); // Save previous conversion
-
-		//Set center point to rotate
-		int centerX = x + entity.getWidth() / 2;
-		int centerY = y + entity.getHeight() / 2;
-
-		//rotate by a given angle
-		g2d.rotate(Math.toRadians(angle), centerX, centerY);
-
-		//Drawing entities
-		drawEntity(entity, x, y, threadNumber);
-
-		g2d.setTransform(oldTransform); // Restore to original conversion state
+	public <T extends Entity> void drawEntities(Set<T> entities, final int threadNumber ) {
+		for (T entity : entities) {
+			drawEntity(entity, entity.getPositionX(), entity.getPositionY());
+		}
 	}
 
 	/**
@@ -410,12 +381,10 @@ public final class DrawManager {
 	}
 
 	/**
-	 * Draws current score on screen.
+	 * Draws the current score on the screen.
 	 *
-	 * @param screen
-	 *            Screen to draw on.
-	 * @param score
-	 *            Current score.
+	 * @param screen The screen object where the score will be displayed.
+	 * @param score  The current score to be displayed.
 	 */
 	public void drawScore(final Screen screen, final int score) {
 		backBufferGraphics.setFont(fontRegular);
@@ -606,12 +575,7 @@ public final class DrawManager {
 	 *            X coordinate of the line.
 	 */
 
-	public void drawLaunchTrajectory(final Screen screen, final int positionX) {
-		backBufferGraphics.setColor(Color.DARK_GRAY);
-		for (int i = 0; i < screen.getHeight() - 140; i += 20){
-			backBufferGraphics.drawRect(positionX + 13, screen.getHeight() - 100 - i,1,10);
-		}
-    }
+
 	/**
 	 * Draws launch trajectory on screen.
 	 *
@@ -760,8 +724,6 @@ public final class DrawManager {
 		drawCenteredRegularString(screen, exitString, screen.getHeight()
 				/ 7 * 4 + fontRegularMetrics.getHeight() * 9);
 	}
-
-
 
 	/**
 	 * Draws game results.
@@ -1040,11 +1002,11 @@ public final class DrawManager {
 						screen.getHeight() / 2 + fontRegularMetrics.getHeight() * 5 + 5);
 			} else {
 				backBufferGraphics.setColor(Color.orange);
-				drawRightSideAchievementCoinBigString(screen, ACCURACY_COIN_REWARD[maxCombo <= 9 ? 0 : maxCombo / 5 - 1],
+				drawRightSideAchievementCoinBigString(screen, ACCURACY_COIN_REWARD[maxCombo / 5 - 1],
 						screen.getHeight() / 2 + fontRegularMetrics.getHeight() * 2 + fontBigMetrics.getHeight() * 2);
 
 				backBufferGraphics.setColor(Color.WHITE);
-				String accuracyAchievement = String.format("             %d", maxCombo) + " =>" + String.format("         %d", maxCombo <= 9 ? 10 : (((( (maxCombo - 10) / 5) + 1) * 5 ) + 10));
+				String accuracyAchievement = String.format("             %d", maxCombo) + " =>" + String.format("         %d", ((maxCombo - 10) / 5 + 1) * 5 + 10);
 				drawRightSideAchievementBigString(screen, accuracyAchievement,
 						screen.getHeight() / 2 + fontRegularMetrics.getHeight() * 5 + 5);
 			}
@@ -1177,12 +1139,6 @@ public final class DrawManager {
 		backBufferGraphics.drawString(string, screen.getWidth() / 4
 				- fontRegularMetrics.stringWidth(string) / 2, height);
 	}
-	public void drawLeftSideScoreSmallString(final Screen screen,
-											   final String string, final int height) {
-		backBufferGraphics.setFont(fontSmall);
-		backBufferGraphics.drawString(string, screen.getWidth() / 4
-				- fontRegularMetrics.stringWidth(string) / 3, height);
-	}
 
 	//right side Cumulative score
 	public void drawRightSideCumulativeRegularString(final Screen screen,
@@ -1204,12 +1160,6 @@ public final class DrawManager {
 													 final String string, final int height) {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.drawString(string, screen.getWidth() *22/ 100
-				- fontRegularMetrics.stringWidth(string) / 2, height);
-	}
-	public void drawLeftSideAchievementSmallString(final Screen screen,
-													 final String string, final int height) {
-		backBufferGraphics.setFont(fontSmall);
-		backBufferGraphics.drawString(string, screen.getWidth() *26/ 100
 				- fontRegularMetrics.stringWidth(string) / 2, height);
 	}
 
@@ -1267,9 +1217,6 @@ public final class DrawManager {
 		backBufferGraphics.setFont(fontBig);
 		backBufferGraphics.drawString(string, screen.getWidth()*81/100 , height);
 	}
-
-
-
 
 	/**
 	 * Draws a centered string on big font.
@@ -1401,27 +1348,15 @@ public final class DrawManager {
 			int shipY = ship.getPositionY();
 			int shipWidth = ship.getWidth();
 			int circleSize = 16;
-			int startAngle = 90;
-			int endAngle = 0;
-			switch(Core.BASE_SHIP){
-				case Ship.ShipType.VoidReaper:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 0.4);
-				    break;
-				case Ship.ShipType.CosmicCruiser:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.6);
-				    break;
-				case Ship.ShipType.StarDefender:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.0);
-					break;
-				case Ship.ShipType.GalacticGuardian:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.2);
-					break;
+			int endAngle = switch (Core.BASE_SHIP) {
+                case Ship.ShipType.VoidReaper -> 360 * (int) remainingTime / (int) (750 * 0.4);
+                case Ship.ShipType.CosmicCruiser -> 360 * (int) remainingTime / (int) (750 * 1.6);
+                case Ship.ShipType.StarDefender -> 360 * (int) remainingTime / (int) (750 * 1.0);
+                case Ship.ShipType.GalacticGuardian -> 360 * (int) remainingTime / (int) (750 * 1.2);
+            };
 
-
-			}
-
-			backBufferGraphics.fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
-					circleSize, circleSize, startAngle, endAngle);
+            backBufferGraphics.fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
+					circleSize, circleSize, 90, endAngle);
 		}
 	}
 	/**
@@ -1445,24 +1380,14 @@ public final class DrawManager {
 			int shipY = ship.getPositionY();
 			int shipWidth = ship.getWidth();
 			int circleSize = 16;
-			int startAngle = 90;
-			int endAngle = 0;
-			switch(Core.BASE_SHIP){
-				case Ship.ShipType.VoidReaper:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 0.4);
-					break;
-				case Ship.ShipType.CosmicCruiser:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.6);
-					break;
-				case Ship.ShipType.StarDefender:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.0);
-					break;
-				case Ship.ShipType.GalacticGuardian:
-					endAngle = 360 * (int)remainingTime / (int)(750 * 1.2);
-					break;
-			}
-			threadBufferGraphics[threadNumber].fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
-					circleSize, circleSize, startAngle, endAngle);
+			int endAngle = switch (Core.BASE_SHIP) {
+                case Ship.ShipType.VoidReaper -> 360 * (int) remainingTime / (int) (750 * 0.4);
+                case Ship.ShipType.CosmicCruiser -> 360 * (int) remainingTime / (int) (750 * 1.6);
+                case Ship.ShipType.StarDefender -> 360 * (int) remainingTime / (int) (750 * 1.0);
+                case Ship.ShipType.GalacticGuardian -> 360 * (int) remainingTime / (int) (750 * 1.2);
+            };
+            threadBufferGraphics[threadNumber].fillArc(shipX + shipWidth/2 - circleSize/2, shipY - 3*circleSize/2,
+					circleSize, circleSize, 90, endAngle);
 		}
 	}
 

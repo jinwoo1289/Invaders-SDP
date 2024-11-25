@@ -5,7 +5,7 @@ import engine.DrawManager.SpriteType;
 import engine.Sound;
 import engine.SoundManager;
 
-public class Barrier extends Entity{
+public class Barrier extends Entity {
 
     private int health;
 
@@ -31,5 +31,7 @@ public class Barrier extends Entity{
         return this.health;
     }
 
+    public int getPositionX() {return positionX;}
+    public int getPositionY() {return positionY;}
 
 }

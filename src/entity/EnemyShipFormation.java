@@ -119,61 +119,82 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 	public EnemyShipFormation(final GameSettings gameSettings, final GameState gameState) {
 		this.drawManager = Core.getDrawManager();
 		this.logger = Core.getLogger();
-		this.enemyShips = new ArrayList<List<EnemyShip>>();
+		this.enemyShips = new ArrayList<>();
 		this.currentDirection = Direction.RIGHT;
 		this.movementInterval = 0;
 		this.nShipsWide = gameSettings.getFormationWidth();
 		this.nShipsHigh = gameSettings.getFormationHeight();
 		this.shootingInterval = gameSettings.getShootingFrecuency();
-		this.shootingVariance = (int) (gameSettings.getShootingFrecuency()
-				* SHOOTING_VARIANCE);
+		this.shootingVariance = (int) (gameSettings.getShootingFrecuency() * SHOOTING_VARIANCE);
 		this.baseSpeed = gameSettings.getBaseSpeed();
 		this.movementSpeed = this.baseSpeed;
 		this.positionX = INIT_POS_X;
 		this.positionY = INIT_POS_Y;
-		this.shooters = new ArrayList<EnemyShip>();
+		this.shooters = new ArrayList<>();
 		this.gameState = gameState;
-		SpriteType spriteType;
 
 		this.logger.info("Initializing " + nShipsWide + "x" + nShipsHigh
 				+ " ship formation in (" + positionX + "," + positionY + ")");
 
-		// Each sub-list is a column on the formation.
-		for (int i = 0; i < this.nShipsWide; i++)
-			this.enemyShips.add(new ArrayList<EnemyShip>());
+		// 적 우주선 초기화
+		initializeEnemyShips();
+
+		// 형상 크기 계산
+		calculateFormationDimensions();
+
+		// 슈터 리스트 초기화
+		initializeShooters();
+	}
+
+	// 적 우주선 초기화 메서드
+	private void initializeEnemyShips() {
+		for (int i = 0; i < this.nShipsWide; i++) {
+			this.enemyShips.add(new ArrayList<>());
+		}
 
 		for (List<EnemyShip> column : this.enemyShips) {
 			for (int i = 0; i < this.nShipsHigh; i++) {
-				if (i / (float) this.nShipsHigh < PROPORTION_E)
-					spriteType = SpriteType.EnemyShipE1;
-				else if (i / (float) this.nShipsHigh <  PROPORTION_E + PROPORTION_D)
-					spriteType = SpriteType.EnemyShipD1;
-				else if (i / (float) this.nShipsHigh <  PROPORTION_E + PROPORTION_D + PROPORTION_C)
-					spriteType = SpriteType.EnemyShipC1;
-				else if (i / (float) this.nShipsHigh <  PROPORTION_E + PROPORTION_D + PROPORTION_C + PROPORTION_B)
-					spriteType = SpriteType.EnemyShipB1;
-				else
-					spriteType = SpriteType.EnemyShipA1;
-
-				column.add(new EnemyShip((SEPARATION_DISTANCE 
-						* this.enemyShips.indexOf(column))
-								+ positionX, (SEPARATION_DISTANCE * i)
-								+ positionY, spriteType, gameState));
+				SpriteType spriteType = determineSpriteType(i);
+				column.add(new EnemyShip(
+						(SEPARATION_DISTANCE * this.enemyShips.indexOf(column)) + positionX,
+						(SEPARATION_DISTANCE * i) + positionY,
+						spriteType, gameState));
 				this.shipCount++;
 			}
 		}
+	}
 
+	// 적 우주선의 SpriteType 결정 메서드
+	private SpriteType determineSpriteType(int index) {
+		float proportion = index / (float) this.nShipsHigh;
+		if (proportion < PROPORTION_E) {
+			return SpriteType.EnemyShipE1;
+		} else if (proportion < PROPORTION_E + PROPORTION_D) {
+			return SpriteType.EnemyShipD1;
+		} else if (proportion < PROPORTION_E + PROPORTION_D + PROPORTION_C) {
+			return SpriteType.EnemyShipC1;
+		} else if (proportion < PROPORTION_E + PROPORTION_D + PROPORTION_C + PROPORTION_B) {
+			return SpriteType.EnemyShipB1;
+		} else {
+			return SpriteType.EnemyShipA1;
+		}
+	}
+
+	// 형상 크기 계산 메서드
+	private void calculateFormationDimensions() {
 		this.shipWidth = this.enemyShips.get(0).get(0).getWidth();
 		this.shipHeight = this.enemyShips.get(0).get(0).getHeight();
-
-		this.width = (this.nShipsWide - 1) * SEPARATION_DISTANCE
-				+ this.shipWidth;
-		this.height = (this.nShipsHigh - 1) * SEPARATION_DISTANCE
-				+ this.shipHeight;
-
-		for (List<EnemyShip> column : this.enemyShips)
-			this.shooters.add(column.get(column.size() - 1));
+		this.width = (this.nShipsWide - 1) * SEPARATION_DISTANCE + this.shipWidth;
+		this.height = (this.nShipsHigh - 1) * SEPARATION_DISTANCE + this.shipHeight;
 	}
+
+	// 슈터 리스트 초기화 메서드
+	private void initializeShooters() {
+		for (List<EnemyShip> column : this.enemyShips) {
+			this.shooters.add(column.get(column.size() - 1));
+		}
+	}
+
 
 	/**
 	 * Associates the formation to a given screen.
@@ -210,157 +231,214 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 	 * Updates the position of the ships.
 	 */
 	public final void update() {
-		if(this.shootingCooldown == null) {
-			this.shootingCooldown = Core.getVariableCooldown(shootingInterval,
-					shootingVariance);
-			this.shootingCooldown.reset();
-		}
-
+		initializeShootingCooldown();
 		adjustFormationBounds();
 
+		if (shouldMoveFormation()) {
+			updateMovement();
+			clearDestroyedShips();
+			updateEnemyShips();
+		}
+	}
+
+	// 사격 쿨다운 초기화 메서드
+	private void initializeShootingCooldown() {
+		if (this.shootingCooldown == null) {
+			this.shootingCooldown = Core.getVariableCooldown(shootingInterval, shootingVariance);
+			this.shootingCooldown.reset();
+		}
+	}
+
+	// 움직임이 필요한지 확인하는 메서드
+	private boolean shouldMoveFormation() {
+		movementInterval++;
+		return movementInterval >= calculateMovementSpeed();
+	}
+
+	// 현재 대형의 속도 계산
+	private int calculateMovementSpeed() {
+		double remainingProportion = (double) this.shipCount / (this.nShipsHigh * this.nShipsWide);
+		this.movementSpeed = this.baseSpeed + MINIMUM_SPEED;
+		return this.movementSpeed;
+	}
+
+	// 대형 움직임 업데이트 메서드
+	private void updateMovement() {
+		movementInterval = 0;
+
+		Direction nextDirection = determineNextDirection();
+		applyMovement(nextDirection);
+	}
+
+	// 다음 이동 방향 결정
+	private Direction determineNextDirection() {
+		if (isMovingDown() && isAtHorizontalAltitude()) {
+			return getNextHorizontalDirection();
+		} else if (isAtLeftSide() && currentDirection == Direction.LEFT) {
+			return isAtBottom() ? Direction.RIGHT : Direction.DOWN;
+		} else if (isAtRightSide() && currentDirection == Direction.RIGHT) {
+			return isAtBottom() ? Direction.LEFT : Direction.DOWN;
+		}
+		return currentDirection;
+	}
+
+	// 대형이 아래로 이동 중인지 확인
+	private boolean isMovingDown() {
+		return currentDirection == Direction.DOWN;
+	}
+
+	// 화면 하단에 도달했는지 확인
+	private boolean isAtBottom() {
+		return positionY + this.height > screen.getHeight() - BOTTOM_MARGIN;
+	}
+
+	// 오른쪽 경계에 도달했는지 확인
+	private boolean isAtRightSide() {
+		return positionX + this.width >= screen.getWidth() - SIDE_MARGIN;
+	}
+
+	// 왼쪽 경계에 도달했는지 확인
+	private boolean isAtLeftSide() {
+		return positionX <= SIDE_MARGIN;
+	}
+
+	// 수평적으로 정확히 하강 중인지 확인
+	private boolean isAtHorizontalAltitude() {
+		return positionY % DESCENT_DISTANCE == 0;
+	}
+
+	// 이전 방향에 따라 다음 수평 방향 결정
+	private Direction getNextHorizontalDirection() {
+		return (previousDirection == Direction.RIGHT) ? Direction.LEFT : Direction.RIGHT;
+	}
+
+
+	// 움직임 적용
+	private void applyMovement(Direction nextDirection) {
 		int movementX = 0;
 		int movementY = 0;
-		double remainingProportion = (double) this.shipCount
-				/ (this.nShipsHigh * this.nShipsWide);
-		this.movementSpeed = this.baseSpeed;
-		this.movementSpeed += MINIMUM_SPEED;
 
-		movementInterval++;
-		if (movementInterval >= this.movementSpeed) {
-			movementInterval = 0;
-
-			boolean isAtBottom = positionY
-					+ this.height > screen.getHeight() - BOTTOM_MARGIN;
-			boolean isAtRightSide = positionX
-					+ this.width >= screen.getWidth() - SIDE_MARGIN;
-			boolean isAtLeftSide = positionX <= SIDE_MARGIN;
-			boolean isAtHorizontalAltitude = positionY % DESCENT_DISTANCE == 0;
-
-			if (currentDirection == Direction.DOWN) {
-				if (isAtHorizontalAltitude)
-					if (previousDirection == Direction.RIGHT) {
-						currentDirection = Direction.LEFT;
-						this.logger.info("Formation now moving left 1");
-					} else {
-						currentDirection = Direction.RIGHT;
-						this.logger.info("Formation now moving right 2");
-					}
-			} else if (currentDirection == Direction.LEFT) {
-				if (isAtLeftSide)
-					if (!isAtBottom) {
-						previousDirection = currentDirection;
-						currentDirection = Direction.DOWN;
-						this.logger.info("Formation now moving down 3");
-					} else {
-						currentDirection = Direction.RIGHT;
-						this.logger.info("Formation now moving right 4");
-					}
-			} else {
-				if (isAtRightSide)
-					if (!isAtBottom) {
-						previousDirection = currentDirection;
-						currentDirection = Direction.DOWN;
-						this.logger.info("Formation now moving down 5");
-					} else {
-						currentDirection = Direction.LEFT;
-						this.logger.info("Formation now moving left 6");
-					}
-			}
-
-			if (currentDirection == Direction.RIGHT)
-				movementX = X_SPEED;
-			else if (currentDirection == Direction.LEFT)
-				movementX = -X_SPEED;
-			else
-				movementY = Y_SPEED;
-
-			positionX += movementX;
-			positionY += movementY;
-
-			// Cleans explosions.
-			for (int i = 0; i < this.enemyShips.size(); i++)
-				for (int j = 0; j < this.enemyShips.get(i).size(); j++)
-					if (this.enemyShips.get(i).get(j) != null && this.enemyShips.get(i).get(j).isDestroyed()) {
-						this.logger.info("Removed enemy " + j + " from column " + i);
-						this.enemyShips.get(i).set(j, null);
-					}
-
-			for (List<EnemyShip> column : this.enemyShips)
-				for (EnemyShip enemyShip : column)
-					if (enemyShip != null) {
-						enemyShip.move(movementX, movementY);
-						enemyShip.update();
-					}
+		if (nextDirection == Direction.RIGHT) {
+			movementX = X_SPEED;
+		} else if (nextDirection == Direction.LEFT) {
+			movementX = -X_SPEED;
+		} else if (nextDirection == Direction.DOWN) {
+			movementY = Y_SPEED;
 		}
+
+		positionX += movementX;
+		positionY += movementY;
+		currentDirection = nextDirection;
+
+		logger.info("Formation now moving " + currentDirection);
+	}
+
+	// 파괴된 적 우주선 제거 메서드
+	private void clearDestroyedShips() {
+		for (int i = 0; i < this.enemyShips.size(); i++) {
+			for (int j = 0; j < this.enemyShips.get(i).size(); j++) {
+				EnemyShip ship = this.enemyShips.get(i).get(j);
+				if (ship != null && ship.isDestroyed()) {
+					logger.info("Removed enemy " + j + " from column " + i);
+					this.enemyShips.get(i).set(j, null);
+				}
+			}
+		}
+	}
+
+	// 개별 적 우주선 업데이트 메서드
+	private void updateEnemyShips() {
+		for (List<EnemyShip> column : this.enemyShips) {
+			for (EnemyShip enemyShip : column) {
+				if (enemyShip != null) {
+					enemyShip.move(getMovementX(), getMovementY());
+					enemyShip.update();
+				}
+			}
+		}
+	}
+
+	// 현재 X축 움직임 반환
+	private int getMovementX() {
+		return (currentDirection == Direction.RIGHT) ? X_SPEED
+				: (currentDirection == Direction.LEFT) ? -X_SPEED : 0;
+	}
+
+	// 현재 Y축 움직임 반환
+	private int getMovementY() {
+		return (currentDirection == Direction.DOWN) ? Y_SPEED : 0;
 	}
 
 	/**
 	 * Adjusts the width and height of the formation.
 	 */
 	private void adjustFormationBounds() {
-		int maxColumn = 0;
+		int leftMostPoint = Integer.MAX_VALUE;
+		int rightMostPoint = Integer.MIN_VALUE;
 		int minPositionY = Integer.MAX_VALUE;
+		int maxColumnHeight = 0;
 
-		for (int i = 0; i < this.enemyShips.size(); i++) {
-			List<EnemyShip> column = this.enemyShips.get(i);
-
-			// Check whether every ship is null
-			boolean allNull = column.stream().allMatch(Objects::isNull);
-
-			if (!allNull) {
-				// Find non-null elements only
-				EnemyShip firstNonNullShip = null;
-				EnemyShip lastNonNullShip = null;
-
-				// Find the first and last non-null elements in the column
-				for (EnemyShip ship : column) {
-					if (ship != null) {
-						if (firstNonNullShip == null) {
-							firstNonNullShip = ship;
-						}
-						lastNonNullShip = ship;
-					}
-				}
-
-				// Calculate the height of this column
-				int columnSize = lastNonNullShip.getPositionY() - this.positionY + this.shipHeight;
-				maxColumn = Math.max(maxColumn, columnSize);
-				minPositionY = Math.min(minPositionY, firstNonNullShip.getPositionY());
-			}
-		}
-
-		int leftMostPoint = 0;
-		int rightMostPoint = 0;
-
+		// 적 대형의 모든 열을 한 번에 처리
 		for (List<EnemyShip> column : this.enemyShips) {
-			// Skip empty or all-null columns
-			if (!column.isEmpty()) {
-				EnemyShip firstNonNullShip = null;
+			// 열에서 경계값 계산
+			Bounds bounds = calculateColumnBounds(column);
 
-				// Find the first non-null ship in the column
-				for (EnemyShip ship : column) {
-					if (ship != null) {
-						firstNonNullShip = ship;
-						break; // We only need the first non-null element
-					}
-				}
-
-				// Perform calculations only if a non-null ship is found
-				if (firstNonNullShip != null) {
-					if (leftMostPoint == 0) {
-						leftMostPoint = firstNonNullShip.getPositionX();
-					}
-					rightMostPoint = firstNonNullShip.getPositionX();
-				}
+			if (bounds != null) {
+				leftMostPoint = Math.min(leftMostPoint, bounds.leftX);
+				rightMostPoint = Math.max(rightMostPoint, bounds.rightX);
+				minPositionY = Math.min(minPositionY, bounds.topY);
+				maxColumnHeight = Math.max(maxColumnHeight, bounds.height);
 			}
 		}
 
+		// 대형의 경계 업데이트
 		this.width = rightMostPoint - leftMostPoint + this.shipWidth;
-		this.height = maxColumn;
-
+		this.height = maxColumnHeight;
 		this.positionX = leftMostPoint;
 		this.positionY = minPositionY;
 	}
+
+	// 열의 경계값 계산 메서드
+	private Bounds calculateColumnBounds(List<EnemyShip> column) {
+		// 열이 비어있거나 모든 우주선이 null이면 null 반환
+		if (column == null || column.stream().allMatch(Objects::isNull)) {
+			return null;
+		}
+
+		EnemyShip firstNonNull = null;
+		EnemyShip lastNonNull = null;
+
+		// 첫 번째와 마지막 유효 우주선을 찾음
+		for (EnemyShip ship : column) {
+			if (ship != null) {
+				if (firstNonNull == null) {
+					firstNonNull = ship;
+				}
+				lastNonNull = ship;
+			}
+		}
+
+		// 경계값 계산 및 반환
+		int leftX = firstNonNull.getPositionX();
+		int rightX = lastNonNull.getPositionX();
+		int topY = firstNonNull.getPositionY();
+		int height = lastNonNull.getPositionY() - this.positionY + this.shipHeight;
+
+		return new Bounds(leftX, rightX, topY, height);
+	}
+
+	// 경계값을 담는 클래스
+	private static class Bounds {
+		int leftX, rightX, topY, height;
+
+		Bounds(int leftX, int rightX, int topY, int height) {
+			this.leftX = leftX;
+			this.rightX = rightX;
+			this.topY = topY;
+			this.height = height;
+		}
+	}
+
 
 	/**
 	 * Shoots a bullet downwards.

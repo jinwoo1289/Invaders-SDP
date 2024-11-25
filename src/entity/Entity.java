@@ -72,7 +72,7 @@ public class Entity {
 	 * 
 	 * @return Position of the entity in the X axis.
 	 */
-	public final int getPositionX() {
+	public int getPositionX() {
 		return this.positionX;
 	}
 
@@ -81,7 +81,7 @@ public class Entity {
 	 * 
 	 * @return Position of the entity in the Y axis.
 	 */
-	public final int getPositionY() {
+	public int getPositionY() {
 		return this.positionY;
 	}
 
@@ -131,4 +131,6 @@ public class Entity {
 	public final int getHeight() {
 		return this.height;
 	}
+
+
 }

@@ -12,11 +12,10 @@ public class AchievementManager {
     private static final Logger logger = Logger.getLogger(AchievementManager.class.getName());
 
 
-    private Achievement achievement;
+    private final Achievement achievement;
 
     // Variables related to Perfect Achievement
     private static int currentPerfectLevel;
-    private final int MAX_PERFECT_STAGE = 7;
 
     // Variables related to Accuracy Achievement
     private int highMaxCombo; // List of accuracy achievements
@@ -29,16 +28,11 @@ public class AchievementManager {
 
     private final int[] COMBO_COIN_REWARD = {500, 1500, 2000, 2500};
     private final int[] PERFECT_COIN_REWARD = {200, 400, 800, 2000, 3000, 4000, 5000};
-    private final int FLAWLESS_FAILURE_COIN = 1000;
-    private final int PLAY_TIME_COIN = 1000;
-
-    private boolean checkPlayTimeAch;
-
 
     // Variables needed for each achievement are loaded through a file.
     public AchievementManager() throws IOException {
         achievement = FileManager.getInstance().loadAchievement();
-        this.currentPerfectLevel = achievement.getPerfectStage();
+        currentPerfectLevel = achievement.getPerfectStage();
         this.highMaxCombo = achievement.getHighmaxCombo();
         this.checkFlawlessFailure = achievement.getFlawlessFailure();
     }
@@ -49,6 +43,7 @@ public class AchievementManager {
 
     public void updateTotalPlayTime(int playTime) {
         if (achievement.getTotalPlayTime() < 600 && achievement.getTotalPlayTime() + playTime >= 600) {
+            int PLAY_TIME_COIN = 1000;
             coinReward += PLAY_TIME_COIN;
         }
         achievement.setTotalPlayTime(playTime);
@@ -66,14 +61,14 @@ public class AchievementManager {
             return;
         }
         int maxComboGoal = 10;
-        if (highMaxCombo < 10) {
-            maxComboGoal = 10;
-        } else if (highMaxCombo < 15) {
-            maxComboGoal = 15;
-        } else if (highMaxCombo < 20) {
-            maxComboGoal = 20;
-        } else if (highMaxCombo < 25) {
-            maxComboGoal = 25;
+        if (highMaxCombo >= 10) {
+            if (highMaxCombo < 15) {
+                maxComboGoal = 15;
+            } else if (highMaxCombo < 20) {
+                maxComboGoal = 20;
+            } else if (highMaxCombo < 25) {
+                maxComboGoal = 25;
+            }
         }
         int rewardIndex = highMaxCombo / 5 - 1 <= 9 ? 0 : highMaxCombo / 5 - 1;
         highMaxCombo = maxCombo;
@@ -94,7 +89,7 @@ public class AchievementManager {
             for (int i = rewardIndex; i < 2; i++) {
                 coinReward += COMBO_COIN_REWARD[i];
             }
-        } else if (highMaxCombo >= 10) {
+        } else {
             coinReward += COMBO_COIN_REWARD[0];
         }
         // Save the updated achievement.
@@ -104,6 +99,7 @@ public class AchievementManager {
      * Check if the perfect achievement has been reached.
      */
     public void updatePerfect(final int MAX_LIVES, int checkLives, int gameLevel) {
+        int MAX_PERFECT_STAGE = 7;
         if (checkLives >= MAX_LIVES && currentPerfectLevel < MAX_PERFECT_STAGE && gameLevel > currentPerfectLevel) {
             // Check if the current perfect stage has not exceeded the total stages.
             currentPerfectLevel += 1;
@@ -115,6 +111,7 @@ public class AchievementManager {
     public void updateFlawlessFailure(double accuracy) {
         if (!checkFlawlessFailure && accuracy <= 0) {
             checkFlawlessFailure = true;
+            int FLAWLESS_FAILURE_COIN = 1000;
             coinReward += FLAWLESS_FAILURE_COIN;
             achievement.setFlawlessFailure(true);
         }

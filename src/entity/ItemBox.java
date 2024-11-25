@@ -4,6 +4,7 @@ import engine.DrawManager.SpriteType;
 import engine.Sound;
 import engine.SoundManager;
 
+
 import java.awt.*;
 
 /**
@@ -56,4 +57,11 @@ public class ItemBox extends Entity {
     public boolean isDroppedRightNow() {
         return this.droppedRightNow;
     }
+
+    public int getPositionX() {return positionX;}
+    public int getPositionY() {return positionY;}
+
+
 }
+
+

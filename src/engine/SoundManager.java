@@ -3,6 +3,7 @@ package engine;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
@@ -121,27 +122,31 @@ public class SoundManager {
      * @param filePath Path of the sound file
      * @throws IOException,UnsupportedAudioFileException,LineUnavailableException,IllegalArgumentException exception
      */
-    public void loadSound(Sound sound, String filePath) throws IOException, UnsupportedAudioFileException, LineUnavailableException, IllegalArgumentException {
+    public void loadSound(Sound sound, String filePath) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
         File soundFile = new File(filePath);
         if (!soundFile.exists()) {
             throw new IOException("Sound file not found: " + filePath);
         }
 
-        List<Clip> clipPool = new ArrayList<>();
-        for (int i = 0; i < POOL_SIZE; i++) {
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clipPool.add(clip);
+        // Create and populate the clip pool
+        try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile)) {
+            List<Clip> clipPool = new ArrayList<>();
+            for (int i = 0; i < POOL_SIZE; i++) {
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioStream);
+                clipPool.add(clip);
+            }
+            soundPools.put(sound, clipPool);
         }
-        soundPools.put(sound, clipPool);
 
-        AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-        Clip clip = AudioSystem.getClip();
-        clip.open(audioStream);
-
-        soundClips.put(sound, clip);
+        // Load and store a single reusable clip
+        try (AudioInputStream singleStream = AudioSystem.getAudioInputStream(soundFile)) {
+            Clip singleClip = AudioSystem.getClip();
+            singleClip.open(singleStream);
+            soundClips.put(sound, singleClip);
+        }
     }
+
 
     /**
      * Apply volume to all audio files by converting integer volume to decibels non-linearly.
@@ -149,33 +154,32 @@ public class SoundManager {
      * @param volume Int value of volume (0-10)
      */
     private void setVolume(int volume) {
-        float newVolume = MIN_VOL + (float)(Math.log(volume + 1) / Math.log(11)) * (MAX_VOL - MIN_VOL);
+        float newVolume = MIN_VOL + (float) (Math.log(volume + 1) / Math.log(11)) * (MAX_VOL - MIN_VOL);
 
-        for (Clip clip : soundClips.values()) {
+        // Helper method to set volume for a clip
+        Consumer<Clip> setClipVolume = clip -> {
             try {
                 FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
                 volumeControl.setValue(newVolume);
             } catch (IllegalArgumentException e) {
                 logger.warning("Failed to set volume: " + e.getMessage());
             }
-        }
+        };
 
-        for (List<Clip> clipPool : soundPools.values()) {
-            for (Clip clip : clipPool) {
-                try {
-                    FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                    volumeControl.setValue(newVolume);
-                } catch (IllegalArgumentException e) {
-                    logger.warning("Failed to set volume: " + e.getMessage());
-                }
-            }
-        }
+        // Apply to individual sound clips
+        soundClips.values().forEach(setClipVolume);
+
+        // Apply to pooled clips
+        soundPools.values().forEach(clipPool -> clipPool.forEach(setClipVolume));
     }
 
     /**
      * @return current volume
-     * */
-    public int getVolume() { return currentVolume; }
+     */
+    public int getVolume() {
+        return currentVolume;
+    }
+
 
     /**
      * @return current playing BGM
@@ -208,14 +212,12 @@ public class SoundManager {
      * @param sound Key value of sound
      */
     public void playSound(Sound sound) {
-        if (soundEnabled) {
+        if (soundEnabled && soundClips.containsKey(sound)) {
             Clip clip = soundClips.get(sound);
-            if (clip != null){
-                clip.setFramePosition(0);
-                clip.start();
-            } else {
-                logger.warning("Sound not found: " + sound);
-            }
+            clip.setFramePosition(0);
+            clip.start();
+        } else if (soundEnabled) {
+            logger.warning("Sound not found: " + sound);
         }
     }
 
@@ -226,45 +228,51 @@ public class SoundManager {
      * @param balance Balance value (-1.0 for left, 1.0 for right, 0.0 for center)
      */
     public void playSound(Sound sound, float balance) {
-        if (soundEnabled) {
-            List<Clip> clipPool = soundPools.get(sound);
-            if (clipPool != null) {
-                Clip availableClip = clipPool.stream()
-                        .filter(clip -> !clip.isRunning())
-                        .findFirst()
-                        .orElse(null);
+        if (!soundEnabled) return;
 
-                if (availableClip != null) {
-                    availableClip.setFramePosition(0);
-                    try {
-                        if (POSITIONAL_SOUNDS.contains(sound)) {
-                            setVolumeBalance(availableClip, balance, sound);
-                        }
-                        availableClip.start();
-                        logger.info("Started playing sound: " + sound + " with balance: " + balance);
-                    } catch (Exception e) {
-                        logger.warning("Error playing sound: " + sound + ". Error: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                } else {
-                    logger.warning("No available clips in pool for sound: " + sound);
-                }
-            } else {
-                logger.warning("Sound not found: " + sound);
+        List<Clip> clipPool = soundPools.get(sound);
+        if (clipPool == null) {
+            logger.warning("Sound not found: " + sound);
+            return;
+        }
+
+        Clip availableClip = clipPool.stream()
+                .filter(clip -> !clip.isRunning())
+                .findFirst()
+                .orElse(null);
+
+        if (availableClip == null) {
+            logger.warning("No available clips in pool for sound: " + sound);
+            return;
+        }
+
+        availableClip.setFramePosition(0);
+
+        try {
+            if (POSITIONAL_SOUNDS.contains(sound)) {
+                setVolumeBalance(availableClip, balance, sound);
             }
+            availableClip.start();
+            logger.info("Started playing sound: " + sound + " with balance: " + balance);
+        } catch (Exception e) {
+            logger.warning("Error playing sound: " + sound + ". Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private void setVolumeBalance(Clip clip, float balance, Sound sound) {
         try {
+            FloatControl control = null;
+
             if (clip.isControlSupported(FloatControl.Type.BALANCE)) {
-                FloatControl balanceControl = (FloatControl) clip.getControl(FloatControl.Type.BALANCE);
-                balanceControl.setValue(balance);
-                logger.info("Set BALANCE: " + balance + " for sound: " + sound);
+                control = (FloatControl) clip.getControl(FloatControl.Type.BALANCE);
             } else if (clip.isControlSupported(FloatControl.Type.PAN)) {
-                FloatControl panControl = (FloatControl) clip.getControl(FloatControl.Type.PAN);
-                panControl.setValue(balance);
-                logger.info("Set PAN: " + balance + " for sound: " + sound);
+                control = (FloatControl) clip.getControl(FloatControl.Type.PAN);
+            }
+
+            if (control != null) {
+                control.setValue(balance);
+                logger.info("Set " + control.getType() + ": " + balance + " for sound: " + sound);
             } else {
                 logger.info("No supported balance control. Playing in center for sound: " + sound);
             }
@@ -273,32 +281,34 @@ public class SoundManager {
         }
     }
 
+
     /**
      * Stop the sound file.
      *
      * @param sound Key value of sound
      */
     public void stopSound(Sound sound) {
-        if (soundEnabled) {
-            Clip clips = soundClips.get(sound);
-            if (clips != null && clips.isRunning()) {
-                clips.stop();
-            } else {
-            logger.warning("Sound not playing or not found: " + sound);
-            }
+        if (!soundEnabled) return;
 
-            List<Clip> clipPool = soundPools.get(sound);
-            if (clipPool != null) {
-                clipPool.forEach(clip -> {
-                    if (clip.isRunning()) {
-                        clip.stop();
-                    }
-                });
-            } else {
-                logger.warning("Sound not playing or not found: " + sound);
-            }
+        // Stop single clip if it exists and is running
+        Clip clip = soundClips.get(sound);
+        if (clip != null && clip.isRunning()) {
+            clip.stop();
+        } else if (clip == null) {
+            logger.warning("Sound not found: " + sound);
+        }
+
+        // Stop all running clips in the pool
+        List<Clip> clipPool = soundPools.get(sound);
+        if (clipPool != null) {
+            clipPool.stream()
+                    .filter(Clip::isRunning)
+                    .forEach(Clip::stop);
+        } else {
+            logger.warning("Sound pool not found for sound: " + sound);
         }
     }
+
 
     /**
      * Checks if the specified sound is currently playing.
@@ -307,16 +317,16 @@ public class SoundManager {
      * @return true if the sound is playing, false otherwise.
      */
     public boolean isSoundPlaying(Sound sound) {
-        if (soundEnabled) {
-            Clip clip = soundClips.get(sound);
-            if (clip != null) {
-                return clip.isRunning();
-            } else {
-                logger.warning("Sound not found: " + sound);
-            }
+        if (!soundEnabled) return false;
+
+        Clip clip = soundClips.get(sound);
+        if (clip == null) {
+            logger.warning("Sound not found: " + sound);
+            return false;
         }
-        return false;  // Return false if sound is not enabled or not found
+        return clip.isRunning();
     }
+
 
     /**
      * Loop the sound file.
@@ -324,38 +334,37 @@ public class SoundManager {
      * @param sound Key value of sound
      */
     public void loopSound(Sound sound) {
-        if (soundEnabled) {
-            Clip clip = soundClips.get(sound);
-            if (clip != null) {
-                currentBGM = sound;
-                clip.setFramePosition(0);
-                clip.loop(Clip.LOOP_CONTINUOUSLY);
-            } else {
-                logger.warning("Sound not found: " + sound);
-            }
+        if (!soundEnabled) return;
+
+        Clip clip = soundClips.get(sound);
+        if (clip == null) {
+            logger.warning("Sound not found: " + sound);
+            return;
         }
+
+        currentBGM = sound;
+        clip.setFramePosition(0);
+        clip.loop(Clip.LOOP_CONTINUOUSLY);
     }
 
     /** Stop and close all sound files **/
     public void closeAllSounds() {
-        if (soundEnabled) {
-            for (List<Clip> clipPool : soundPools.values()) {
-                for (Clip clip : clipPool) {
-                    if (clip != null) {
-                        if (clip.isRunning())
-                            clip.stop();
-                        clip.close();
-                    }
-                }
-            }
-            for (Clip clip : soundClips.values()) {
-                if (clip != null) {
-                    if (clip.isRunning())
-                        clip.stop();
-                    clip.close();
-                }
-            }
-        }
-    }
+        if (!soundEnabled) return;
 
+        // Stop and close all clips in soundPools
+        soundPools.values().forEach(clipPool -> clipPool.forEach(clip -> {
+            if (clip != null) {
+                if (clip.isRunning()) clip.stop();
+                clip.close();
+            }
+        }));
+
+        // Stop and close all clips in soundClips
+        soundClips.values().forEach(clip -> {
+            if (clip != null) {
+                if (clip.isRunning()) clip.stop();
+                clip.close();
+            }
+        });
+    }
 }

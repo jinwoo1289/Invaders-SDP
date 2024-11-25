@@ -4,7 +4,8 @@ import engine.DrawManager.SpriteType;
 
 import java.awt.*;
 
-public class Block extends Entity {
+
+public class Block extends Entity{
     /**
      * Constructor, establishes the entity's generic properties.
      *
@@ -15,4 +16,7 @@ public class Block extends Entity {
         super(positionX, positionY, 20 * 2, 7 * 2, Color.WHITE);
         this.spriteType = SpriteType.Block;
     }
+    public int getPositionX() {return positionX;}
+    public int getPositionY() {return positionY;}
+
 }
