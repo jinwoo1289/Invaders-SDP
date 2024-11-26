@@ -160,7 +160,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		this.maxCombo = gameState.getMaxCombo();
 		this.lapTime = gameState.getPrevTime();
 		this.tempScore = gameState.getPrevScore();
-
+		this.alertMessage = "";
 		this.hitBullets = gameState.getHitBullets();
 		this.wallet = wallet;
 	}
@@ -602,9 +602,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		handleCountDown();
 
 
-		//add drawRecord method for drawing
-		drawManager.drawRecord(highScores,this);
-
 
 		drawManager.completeDrawing(this);
 	}
@@ -681,8 +678,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		drawManager.drawCombo(this, this.combo, playerNumber);
 
 
-		//add drawRecord method for drawing
-		drawManager.drawRecord(highScores,this, playerNumber);
 
 
 		drawManager.flushBuffer(this, playerNumber);
@@ -718,8 +713,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			}
 		}
 
-		//add drawRecord method for drawing
-		drawManager.drawRecord(highScores,this, playerNumber);
 		drawManager.flushBuffer(this, playerNumber);
 	}
 

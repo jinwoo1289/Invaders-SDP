@@ -403,8 +403,8 @@ public final class DrawManager {
 	public void drawLevel(final Screen screen, final int level) {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.WHITE);
-		String scoreString = String.format("lv.%d", level);
-		backBufferGraphics.drawString(scoreString, screen.getWidth() / 2 - 60, 25);
+		String levelString = String.format("lv.%d", level);
+		backBufferGraphics.drawString(levelString, screen.getWidth() / 2 - 60, 25);
 	}
 	/**
 	 * Draws level on screen.
@@ -419,8 +419,8 @@ public final class DrawManager {
 	public void drawLevel(final Screen screen, final int level, final int threadNumber) {
 		threadBufferGraphics[threadNumber].setFont(fontRegular);
 		threadBufferGraphics[threadNumber].setColor(Color.WHITE);
-		String scoreString = String.format("lv.%d", level);
-		threadBufferGraphics[threadNumber].drawString(scoreString, screen.getWidth() / 2 - 60, 25);
+		String levelString = String.format("lv.%d", level);
+		threadBufferGraphics[threadNumber].drawString(levelString, screen.getWidth() / 2 - 60, 25);
 	}
 
 	/**
@@ -730,8 +730,6 @@ public final class DrawManager {
 	 * 
 	 * @param screen
 	 *            Screen to draw on.
-	 * @param score
-	 *            Score obtained.
 	 * @param livesRemaining
 	 *            Lives remaining when finished.
 	 * @param shipsDestroyed
@@ -829,8 +827,6 @@ public final class DrawManager {
 	 */
 	public void drawAchievementMenu(final Screen screen, final int totalScore, final int totalPlayTime, final int maxCombo,
 									final int currentPerfectStage, final int nextPerfectStage, boolean checkFlawlessFailure) {
-		//high score section
-		String highScoreTitle = "High Scores";
 
 		//cumulative section
 		String totalScoreTitle = "Total Score";
@@ -898,10 +894,6 @@ public final class DrawManager {
 		drawCenteredRegularString(screen, achievementsExplain,
 				screen.getHeight() / 7 + fontBigMetrics.getHeight() );
 
-		// draw "high score"
-		backBufferGraphics.setColor(Color.GREEN);
-		drawLeftSideScoreRegularString(screen, highScoreTitle,
-				screen.getHeight() / 5+ fontBigMetrics.getHeight());
 
 		// draw total score
 		backBufferGraphics.setColor(Color.yellow);
@@ -1276,59 +1268,7 @@ public final class DrawManager {
 			drawCenteredBigString(screen, "GO!", screen.getHeight() / 2
 					+ fontBigMetrics.getHeight() / 3);
 	}
-   /**
-	 * Draws recorded highscores on screen.
-	 *
-	 * @param highScores
-	 *            Recorded highscores.
-   */
 
-	public void drawRecord(List<Score> highScores, final Screen screen) {
-
-		//add variable for highest score
-		int highestScore = -1;
-		String highestPlayer = "";
-
-		backBufferGraphics.setFont(fontRegular);
-		backBufferGraphics.setColor(Color.LIGHT_GRAY);
-		FontMetrics metrics = backBufferGraphics.getFontMetrics(fontRegular);
-		String highScoreDisplay = highestPlayer + " " + highestScore;
-
-		backBufferGraphics.drawString(highScoreDisplay,
-				screen.getWidth() - metrics.stringWidth(highScoreDisplay) - 76, 25);
-	}
-	/**
-	 * Draws recorded highscores on screen.
-	 *
-	 * @param highScores
-	 *            Recorded highscores.
-	 * @param threadNumber
-	 *            Thread number for two player mode
-	 */
-
-	public void drawRecord(List<Score> highScores, final Screen screen, final int threadNumber) {
-
-		//add variable for highest score
-		int highestScore = -1;
-		String highestPlayer = "";
-
-		// find the highest score from highScores list
-		for (Score entry : highScores) {
-			if (entry.getScore() > highestScore) {
-				highestScore = entry.getScore();
-				highestPlayer = entry.getName();
-			}
-		}
-
-
-		threadBufferGraphics[threadNumber].setFont(fontRegular);
-		threadBufferGraphics[threadNumber].setColor(Color.LIGHT_GRAY);
-		FontMetrics metrics = threadBufferGraphics[threadNumber].getFontMetrics(fontRegular);
-		String highScoreDisplay = highestPlayer + " " + highestScore;
-
-		threadBufferGraphics[threadNumber].drawString(highScoreDisplay,
-				screen.getWidth() - metrics.stringWidth(highScoreDisplay) - 76, 25);
-	}
 	/**
 	 * Draws ReloadTimer on screen.
 	 *
