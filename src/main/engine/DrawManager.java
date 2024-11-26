@@ -1269,17 +1269,7 @@ public final class DrawManager {
 					+ fontBigMetrics.getHeight() / 3);
 	}
 
-	/**
-	 * Draws recorded highscores on screen.
-	 *
-	 *            Recorded highscores.
-	 * @param threadNumber
-	 *            Thread number for two player mode
-	 */
 
-	public void drawRecord(final Screen screen, final int threadNumber) {
-
-	}
 	/**
 	 * Draws ReloadTimer on screen.
 	 *

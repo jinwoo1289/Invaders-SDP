@@ -50,14 +50,13 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	/** Player's ship. */
 	private Ship ship;
 	/** Bonus enemy ship that appears sometimes. */
-	private EnemyShip enemyShipSpecial;
+    private EnemyShip enemyShipSpecial;
 	/** Minimum time between bonus ship appearances. */
-	private Cooldown enemyShipSpecialCooldown;
+    private Cooldown enemyShipSpecialCooldown;
 	/** Time until bonus ship explosion disappears. */
 	private Cooldown enemyShipSpecialExplosionCooldown;
 	/** Time from finishing the level to screen change. */
 	private Cooldown screenFinishedCooldown;
-	private Cooldown shootingCooldown;
 	/** Set of all bullets fired by on screen ships. */
 	private Set<Bullet> bullets;
 	/** Present score */
@@ -79,7 +78,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	/** Moment the game starts. */
 	private long gameStartTime;
 	/** Checks if the level is finished. */
-	private boolean levelFinished;
+    boolean levelFinished;
 	/** Checks if a bonus life is received. **/
 	private boolean bonusLife;
 	/** Player number for two player mode **/
@@ -678,8 +677,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		drawManager.drawCombo(this, this.combo, playerNumber);
 
 
-		//add drawRecord method for drawing
-		drawManager.drawRecord(this, playerNumber);
 
 
 		drawManager.flushBuffer(this, playerNumber);
@@ -715,8 +712,6 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			}
 		}
 
-		//add drawRecord method for drawing
-		drawManager.drawRecord(this, playerNumber);
 		drawManager.flushBuffer(this, playerNumber);
 	}
 
