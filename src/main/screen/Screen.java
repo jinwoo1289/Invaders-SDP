@@ -36,7 +36,7 @@ public class Screen {
 	/** Screen insets. */
 	protected Insets insets;
 	/** Time until the screen accepts user input. */
-	protected Cooldown inputDelay;
+    public Cooldown inputDelay;
 
 	/** If the screen is running. */
 	protected boolean isRunning;

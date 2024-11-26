@@ -48,11 +48,11 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	/** Formation of enemy ships. */
 	private EnemyShipFormation enemyShipFormation;
 	/** Player's ship. */
-	Ship ship;
+    public Ship ship;
 	/** Bonus enemy ship that appears sometimes. */
-    EnemyShip enemyShipSpecial;
+    public EnemyShip enemyShipSpecial;
 	/** Minimum time between bonus ship appearances. */
-    Cooldown enemyShipSpecialCooldown;
+    public Cooldown enemyShipSpecialCooldown;
 	/** Time until bonus ship explosion disappears. */
 	private Cooldown enemyShipSpecialExplosionCooldown;
 	/** Time from finishing the level to screen change. */
@@ -79,7 +79,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 	/** Moment the game starts. */
 	private long gameStartTime;
 	/** Checks if the level is finished. */
-    boolean levelFinished;
+    public boolean levelFinished;
 	/** Checks if a bonus life is received. **/
 	private boolean bonusLife;
 	/** Player number for two player mode **/
@@ -368,7 +368,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		}
 
 
-	void handleEnemyShipSpecial() {
+	public void handleEnemyShipSpecial() {
 		if (this.enemyShipSpecial != null) {
 			if (!this.enemyShipSpecial.isDestroyed())
 				this.enemyShipSpecial.move(2, 0);
@@ -395,7 +395,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			handleAlertMessage();
 	}
 
-	void updateEnemiesAndBullets() {
+	public void updateEnemiesAndBullets() {
 		if (!itemManager.isTimeStopActive()) {
 			this.enemyShipFormation.update();
 			this.enemyShipFormation.shoot(this.bullets, this.level, balance);
@@ -542,7 +542,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 			}
 	}
 
-	void checkLevelCompletion() {
+	public void checkLevelCompletion() {
 		if ((this.enemyShipFormation.isEmpty() || this.lives <= 0)
 				&& !this.levelFinished) {
 			this.levelFinished = true;
@@ -606,7 +606,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		drawManager.completeDrawing(this);
 	}
 
-	void handleCountDown() {
+	public void handleCountDown() {
 		// Countdown to game start.
 		if (!this.inputDelay.checkFinished()) {
 			int countdown = (int) ((INPUT_DELAY - (System.currentTimeMillis() - this.gameStartTime)) / 1000);
@@ -785,7 +785,7 @@ public class GameScreen extends Screen implements Callable<GameState> {
 		BulletPool.recycle(recyclable);
 	}
 
-	void shipCollision(Set<Bullet> recyclable, Bullet bullet) {
+	public void shipCollision(Set<Bullet> recyclable, Bullet bullet) {
 		if (checkCollision(bullet, this.ship) && !this.levelFinished && !itemManager.isGhostActive()) {
 			recyclable.add(bullet);
 			if (!this.ship.isDestroyed()) {
