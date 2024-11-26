@@ -1,43 +1,56 @@
 package screen;
 
-import engine.Cooldown;
-import engine.Core;
-import engine.GameSettings;
-import engine.InputManager;
 import engine.*;
 
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * Implements the game setting screen.
+ */
 public class GameSettingScreen extends Screen {
 	private static GameSettingScreen instance;
 
 	private static final int SELECTION_TIME = 200;
 	private static final int NAME_LIMIT = 4;
 
-	private static String name1;
-	private static String name2;
+	private static String name1 = "P1";
+	private static String name2 = "P2";
 	private static boolean isMultiplayer = false;
-	private int difficultyLevel;
-	private int selectedRow;
+
+	private int difficultyLevel = 1;
+	private int selectedRow = 0;
+
 	private final Cooldown selectionCooldown;
-
-	private static final int TOTAL_ROWS = 3;
-
 	private final SoundManager soundManager = SoundManager.getInstance();
+	private final Map<Integer, Runnable> keyActions = new HashMap<>();
+
+	private enum RowAction {
+		MULTIPLAYER, DIFFICULTY, START;
+
+		public void perform(GameSettingScreen screen) {
+			switch (this) {
+				case MULTIPLAYER -> screen.handleMultiplayer();
+				case DIFFICULTY -> screen.handleDifficulty();
+				case START -> screen.handleStart();
+			}
+		}
+	}
+
+	private final RowAction[] rowActions = {RowAction.MULTIPLAYER, RowAction.DIFFICULTY, RowAction.START};
 
 	public GameSettingScreen(final int width, final int height, final int fps) {
 		super(width, height, fps);
-		this.name1 = "P1";
-		this.name2 = "P2";
-		this.isMultiplayer = false;
-		this.difficultyLevel = 1;
-		this.selectedRow = 0;
-
 		this.selectionCooldown = Core.getCooldown(SELECTION_TIME);
 		this.selectionCooldown.reset();
+		initializeKeyActions();
+	}
 
-		while (!this.selectionCooldown.checkFinished()) {
-		}
+	private void initializeKeyActions() {
+		keyActions.put(KeyEvent.VK_UP, () -> navigateRows(-1));
+		keyActions.put(KeyEvent.VK_DOWN, () -> navigateRows(1));
+		keyActions.put(KeyEvent.VK_ESCAPE, this::exitToMainMenu);
 	}
 
 	public final int run() {
@@ -50,88 +63,85 @@ public class GameSettingScreen extends Screen {
 		draw();
 
 		if (this.inputDelay.checkFinished() && this.selectionCooldown.checkFinished()) {
-			if (inputManager.isKeyDown(KeyEvent.VK_UP)) {
-				this.selectedRow = (this.selectedRow - 1 + TOTAL_ROWS) % TOTAL_ROWS;
-				this.selectionCooldown.reset();
-				soundManager.playSound(Sound.MENU_MOVE);
-			} else if (inputManager.isKeyDown(KeyEvent.VK_DOWN)) {
-				this.selectedRow = (this.selectedRow + 1) % TOTAL_ROWS;
-				this.selectionCooldown.reset();
-				soundManager.playSound(Sound.MENU_MOVE);
-			}
+			keyActions.keySet().stream()
+					.filter(inputManager::isKeyDown)
+					.forEach(key -> keyActions.get(key).run());
+			rowActions[selectedRow].perform(this);
+		}
+	}
 
-			if (this.selectedRow == 0) {
-				if (inputManager.isKeyDown(KeyEvent.VK_LEFT)) {
-					this.isMultiplayer = false;
-					this.selectionCooldown.reset();
-					soundManager.playSound(Sound.MENU_MOVE);
-				} else if (inputManager.isKeyDown(KeyEvent.VK_RIGHT)) {
-					this.isMultiplayer = true;
-					this.selectionCooldown.reset();
-					soundManager.playSound(Sound.MENU_MOVE);
-				} else if (inputManager.isKeyDown(KeyEvent.VK_BACK_SPACE)) {
-					if (isMultiplayer) {
-						if (!this.name2.isEmpty()) {
-							this.name2 = this.name2.substring(0, this.name2.length() - 1);
-							this.selectionCooldown.reset();
-							soundManager.playSound(Sound.MENU_TYPING);
-						}
-					} else {
-						if (!this.name1.isEmpty()) {
-							this.name1 = this.name1.substring(0, this.name1.length() - 1);
-							this.selectionCooldown.reset();
-							soundManager.playSound(Sound.MENU_TYPING);
-						}
-					}
+	private void navigateRows(int direction) {
+		this.selectedRow = (this.selectedRow + direction + rowActions.length) % rowActions.length;
+		resetSelectionCooldownWithSound(Sound.MENU_MOVE);
+	}
+
+	private void handleMultiplayer() {
+		handleKeyWithCondition(KeyEvent.VK_LEFT, () -> isMultiplayer = false);
+		handleKeyWithCondition(KeyEvent.VK_RIGHT, () -> isMultiplayer = true);
+		handleKeyWithCondition(KeyEvent.VK_BACK_SPACE, this::deleteName);
+		handleNameInput();
+	}
+
+	private void handleDifficulty() {
+		handleKeyWithCondition(KeyEvent.VK_LEFT, () -> difficultyLevel = Math.max(0, difficultyLevel - 1));
+		handleKeyWithCondition(KeyEvent.VK_RIGHT, () -> difficultyLevel = Math.min(2, difficultyLevel + 1));
+	}
+
+	private void handleStart() {
+		handleKeyWithCondition(KeyEvent.VK_SPACE, () -> {
+			this.returnCode = isMultiplayer ? 8 : 2;
+			this.isRunning = false;
+			soundManager.playSound(Sound.MENU_CLICK);
+		});
+	}
+
+	private void handleKeyWithCondition(int keyCode, Runnable action) {
+		if (inputManager.isKeyDown(keyCode)) {
+			action.run();
+			resetSelectionCooldownWithSound(Sound.MENU_MOVE);
+		}
+	}
+
+	private void deleteName() {
+		String name = isMultiplayer ? name2 : name1;
+		if (!name.isEmpty()) {
+			if (isMultiplayer) name2 = name2.substring(0, name2.length() - 1);
+			else name1 = name1.substring(0, name1.length() - 1);
+			resetSelectionCooldownWithSound(Sound.MENU_TYPING);
+		}
+	}
+
+	private void handleNameInput() {
+		for (int keyCode = KeyEvent.VK_A; keyCode <= KeyEvent.VK_Z; keyCode++) {
+			if (inputManager.isKeyDown(keyCode)) {
+				String currentName = isMultiplayer ? name2 : name1;
+				if (currentName.length() < NAME_LIMIT) {
+					if (isMultiplayer) name2 += (char) keyCode;
+					else name1 += (char) keyCode;
+					resetSelectionCooldownWithSound(Sound.MENU_TYPING);
 				}
-				handleNameInput(inputManager);
-			} else if (this.selectedRow == 1) {
-				if (inputManager.isKeyDown(KeyEvent.VK_LEFT)) {
-					if (this.difficultyLevel != 0) {
-						this.difficultyLevel--;
-						this.selectionCooldown.reset();
-						soundManager.playSound(Sound.MENU_MOVE);
-					}
-				} else if (inputManager.isKeyDown(KeyEvent.VK_RIGHT)) {
-					if (this.difficultyLevel != 2) {
-						this.difficultyLevel++;
-						this.selectionCooldown.reset();
-						soundManager.playSound(Sound.MENU_MOVE);
-					}
-				}
-			} else if (this.selectedRow == 2) {
-				if (inputManager.isKeyDown(KeyEvent.VK_SPACE)) {
-					this.returnCode = isMultiplayer ? 8 : 2;
-					this.isRunning = false;
-					soundManager.playSound(Sound.MENU_CLICK);
-				}
-			}
-			if (inputManager.isKeyDown(KeyEvent.VK_ESCAPE)) {
-				this.returnCode = 1;
-				this.isRunning = false;
-				soundManager.playSound(Sound.MENU_BACK);
 			}
 		}
 	}
 
-	private void handleNameInput(InputManager inputManager) {
-		for (int keyCode = KeyEvent.VK_A; keyCode <= KeyEvent.VK_Z; keyCode++) {
-			if (inputManager.isKeyDown(keyCode)) {
-				if (isMultiplayer) {
-					if (this.name2.length() < NAME_LIMIT) {
-						this.name2 += (char) keyCode;
-						this.selectionCooldown.reset();
-						soundManager.playSound(Sound.MENU_TYPING);
-					}
-				} else {
-					if (this.name1.length() < NAME_LIMIT) {
-						this.name1 += (char) keyCode;
-						this.selectionCooldown.reset();
-						soundManager.playSound(Sound.MENU_TYPING);
-					}
-				}
-			}
-		}
+	private void exitToMainMenu() {
+		this.returnCode = 1;
+		this.isRunning = false;
+		soundManager.playSound(Sound.MENU_BACK);
+	}
+
+	private void resetSelectionCooldownWithSound(Sound sound) {
+		this.selectionCooldown.reset();
+		soundManager.playSound(sound);
+	}
+
+	private void draw() {
+		drawManager.initDrawing(this);
+		drawManager.drawGameSetting(this);
+		drawManager.drawGameSettingRow(this, this.selectedRow);
+		drawManager.drawGameSettingElements(this, this.selectedRow, isMultiplayer, name1, name2, this.difficultyLevel);
+		drawManager.completeDrawing(this);
+		Core.setLevelSetting(this.difficultyLevel);
 	}
 
 	public static GameSettingScreen getInstance() {
@@ -147,47 +157,5 @@ public class GameSettingScreen extends Screen {
 
 	public static String getName(int playerNumber) {
 		return playerNumber == 0 ? name1 : name2;
-	}
-
-	public void setMultiplayer(boolean multiplayer) {
-		isMultiplayer = multiplayer;
-	}
-
-	public void setDifficultyLevel(int level) {
-		this.difficultyLevel = level;
-	}
-
-	public Cooldown getSelectionCooldown() {
-		return this.selectionCooldown;
-	}
-
-	public void setName(int playerNumber, String name) {
-		if (playerNumber == 0) {
-			name1 = name;
-		} else if (playerNumber == 1) {
-			name2 = name;
-		}
-	}
-
-	public void setSelectedRow(int row) {
-		this.selectedRow = row;
-	}
-
-	public Object getField(String fieldName) {
-		return switch (fieldName.toLowerCase()) {
-			case "difficulty" -> this.difficultyLevel;
-			case "row" -> this.selectedRow;
-			case "multiplayer" -> this.isMultiplayer;
-			default -> null;
-		};
-	}
-
-	private void draw() {
-		drawManager.initDrawing(this);
-		drawManager.drawGameSetting(this);
-		drawManager.drawGameSettingRow(this, this.selectedRow);
-		drawManager.drawGameSettingElements(this, this.selectedRow, isMultiplayer, name1, name2, this.difficultyLevel);
-		drawManager.completeDrawing(this);
-		Core.setLevelSetting(this.difficultyLevel);
 	}
 }
