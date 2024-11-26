@@ -140,39 +140,21 @@ public class ItemManager {
      *
      * @return The score to add and the number of ships destroyed.
      */
+
     private Entry<Integer, Integer> operateBomb() {
         this.soundManager.playSound(Sound.ITEM_BOMB, balance);
 
         int addScore = 0;
         int addShipsDestroyed = 0;
 
-        List<List<EnemyShip>> enemyships = this.enemyShipFormation.getEnemyShips();
-        int enemyShipsSize = enemyships.size();
-
+        List<List<EnemyShip>> enemyShips = this.enemyShipFormation.getEnemyShips();
         int maxCnt = -1;
         int maxRow = 0, maxCol = 0;
 
-        for (int i = 0; i <= enemyShipsSize - 3; i++) {
-
-            List<EnemyShip> rowShips = enemyships.get(i);
-            int rowSize = rowShips.size();
-
-            for (int j = 0; j <= rowSize - 3; j++) {
-
-                int currentCnt = 0;
-
-                for (int x = i; x < i + 3; x++) {
-
-                    List<EnemyShip> subRowShips = enemyships.get(x);
-
-                    for (int y = j; y < j + 3; y++) {
-                        EnemyShip ship = subRowShips.get(y);
-
-                        if (ship != null && !ship.isDestroyed())
-                            currentCnt++;
-                    }
-                }
-
+        // Find the 3x3 block with the most undestroyed ships
+        for (int i = 0; i <= enemyShips.size() - 3; i++) {
+            for (int j = 0; j <= enemyShips.get(i).size() - 3; j++) {
+                int currentCnt = countShipsInBlock(enemyShips, i, j);
                 if (currentCnt > maxCnt) {
                     maxCnt = currentCnt;
                     maxRow = i;
@@ -181,27 +163,44 @@ public class ItemManager {
             }
         }
 
-        List<EnemyShip> targetEnemyShips = new ArrayList<>();
-        for (int i = maxRow; i < maxRow + 3; i++) {
-            List<EnemyShip> subRowShips = enemyships.get(i);
-            for (int j = maxCol; j < maxCol + 3; j++) {
-                EnemyShip ship = subRowShips.get(j);
-
-                if (ship != null && !ship.isDestroyed())
-                    targetEnemyShips.add(ship);
-            }
-        }
-
-        if (!targetEnemyShips.isEmpty()) {
-            for (EnemyShip destroyedShip : targetEnemyShips) {
-                addScore += destroyedShip.getPointValue();
-                addShipsDestroyed++;
-                enemyShipFormation.destroy(destroyedShip, balance);
-            }
+        // Collect and destroy ships in the selected 3x3 block
+        List<EnemyShip> targetEnemyShips = getShipsInBlock(enemyShips, maxRow, maxCol);
+        for (EnemyShip ship : targetEnemyShips) {
+            addScore += ship.getPointValue();
+            addShipsDestroyed++;
+            enemyShipFormation.destroy(ship, balance);
         }
 
         return new SimpleEntry<>(addScore, addShipsDestroyed);
     }
+
+    private int countShipsInBlock(List<List<EnemyShip>> enemyShips, int startRow, int startCol) {
+        int count = 0;
+        for (int i = startRow; i < startRow + 3; i++) {
+            for (int j = startCol; j < startCol + 3; j++) {
+                EnemyShip ship = enemyShips.get(i).get(j);
+                if (ship != null && !ship.isDestroyed()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private List<EnemyShip> getShipsInBlock(List<List<EnemyShip>> enemyShips, int startRow, int startCol) {
+        List<EnemyShip> ships = new ArrayList<>();
+        for (int i = startRow; i < startRow + 3; i++) {
+            for (int j = startCol; j < startCol + 3; j++) {
+                EnemyShip ship = enemyShips.get(i).get(j);
+                if (ship != null && !ship.isDestroyed()) {
+                    ships.add(ship);
+                }
+            }
+        }
+        return ships;
+    }
+
+
 
     /**
      * Operate Line-bomb item.
