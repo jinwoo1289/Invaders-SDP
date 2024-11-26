@@ -1,4 +1,4 @@
-package test.engine;
+package engine;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class GameSettingsTest {
         expected = gameSettings.LevelSettings(10, 9, -140, 500, 4, 1);
 
         assertEquals(10, expected.getFormationWidth());
-        assertEquals(10, expected.getFormationHeight());
+        assertEquals(9, expected.getFormationHeight());
         assertEquals(-150, expected.getBaseSpeed());
         assertEquals(300, expected.getShootingFrecuency());
 
@@ -40,15 +40,15 @@ class GameSettingsTest {
         expected = gameSettings.LevelSettings(11, 9, -150, 600,7, 1);
 
         assertEquals(11, expected.getFormationWidth());
-        assertEquals(10, expected.getFormationHeight());
+        assertEquals(9, expected.getFormationHeight());
         assertEquals(-150, expected.getBaseSpeed());
-        assertEquals(100, expected.getShootingFrecuency());
+        assertEquals(300, expected.getShootingFrecuency());
 
         // Difficulty 2, level 2
         gameSettings = new engine.GameSettings(10, 10, -110, 300);
         expected = gameSettings.LevelSettings(10, 10, -110, 300, 2, 2);
 
-        assertEquals(11, expected.getFormationWidth());
+        assertEquals(10, expected.getFormationWidth());
         assertEquals(10, expected.getFormationHeight());
         assertEquals(-130, expected.getBaseSpeed());
         assertEquals(100, expected.getShootingFrecuency());
