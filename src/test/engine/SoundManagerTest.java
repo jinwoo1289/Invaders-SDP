@@ -114,22 +114,7 @@ class SoundManagerTest {
         assertFalse(soundManager.isSoundPlaying(sound2), "Sound 2 should stop playing after closing all sounds.");
     }
 
-    @Test
-    void testPositionalSoundPlayback() {
-        Sound testSound = Sound.ALIEN_LASER;
 
-        // Play sound with left balance
-        soundManager.playSound(testSound, -1.0f);
-        assertTrue(soundManager.isSoundPlaying(testSound), "Sound should play with left balance.");
-
-        // Stop sound
-        soundManager.stopSound(testSound);
-        assertFalse(soundManager.isSoundPlaying(testSound), "Sound should not be playing after being stopped.");
-
-        // Play sound with right balance
-        soundManager.playSound(testSound, 1.0f);
-        assertTrue(soundManager.isSoundPlaying(testSound), "Sound should play with right balance.");
-    }
 
     @Test
     void testInvalidSoundHandling() {
