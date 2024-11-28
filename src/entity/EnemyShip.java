@@ -8,14 +8,18 @@ import engine.DrawManager.SpriteType;
 import engine.GameState;
 import engine.Sound;
 import engine.SoundManager;
+/**
+ * 최적화 수정 11-28 김동현
+ */
 
 /**
  * Implements a enemy ship, to be destroyed by the player.
- * 
+ *
  * @author <a href="mailto:RobertoIA1987@gmail.com">Roberto Izquierdo Amo</a>
- * 
+ *
  */
 public class EnemyShip extends Entity {
+
 	/** Point value of a type A enemy. */
 	private static final int A_TYPE_POINTS = 10;
 	/** Point value of a type B enemy. */
@@ -42,9 +46,10 @@ public class EnemyShip extends Entity {
 	private final SoundManager soundManager = SoundManager.getInstance();
 
 	private int health;
+
 	/**
 	 * Constructor, establishes the ship's properties.
-	 * 
+	 *
 	 * @param positionX
 	 *            Initial position of the ship in the X axis.
 	 * @param positionY
@@ -52,89 +57,54 @@ public class EnemyShip extends Entity {
 	 * @param spriteType
 	 *            Sprite type, image corresponding to the ship.
 	 */
-	public EnemyShip(final int positionX, final int positionY,
-			final SpriteType spriteType, final GameState gameState) {
-		super(positionX, positionY, 12 * 2, 8 * 2, getDefaultColor(spriteType));
+
+	public EnemyShip(final int positionX, final int positionY, final SpriteType spriteType, final GameState gameState) {
+		super(positionX, positionY, 24, 16, getDefaultColor(spriteType));
 
 		this.spriteType = spriteType;
 		this.animationCooldown = Core.getCooldown(500);
 		this.isDestroyed = false;
-        //Determine enemy health based on game level
-		this.health = 0;
-		for(int i =1; i<=gameState.getLevel()/3;i++){
-			this.health++;
-		}
 
-		switch (this.spriteType) {
-		case EnemyShipA1:
-		case EnemyShipA2:
-			this.pointValue = (int) (A_TYPE_POINTS+(gameState.getLevel()*0.1)+Core.getLevelSetting());
-			break;
-		case EnemyShipB1:
-		case EnemyShipB2:
-			this.pointValue = (int) (B_TYPE_POINTS+(gameState.getLevel()*0.1)+Core.getLevelSetting());
-			break;
-		case EnemyShipC1:
-		case EnemyShipC2:
-			this.pointValue = (int) (C_TYPE_POINTS+(gameState.getLevel()*0.1)+Core.getLevelSetting());
-			break;
-		case EnemyShipD1:
-		case EnemyShipD2:
-			this.pointValue = D_TYPE_POINTS;
-			break;
-		case EnemyShipE1:
-		case EnemyShipE2:
-			this.pointValue = E_TYPE_POINTS;
-			break;
-		case EnemyShipF1:
-			this.pointValue = F_TYPE_POINTS;
-			break;
-		default:
-			this.pointValue = 0;
-			break;
-		}
+		this.health = Math.max(1, gameState.getLevel() / 3); // 최소 1 이상 목숨 설정
+		this.pointValue = calculatePointValue(spriteType, gameState);
 	}
-
-	/**
-	 * Giving color for each enemy ship
-	 */
-		public static Color getDefaultColor(SpriteType spriteType) {
-			switch (spriteType) {
-				case EnemyShipA1:
-				case EnemyShipA2:
-					return Color.RED; // Цвет для типа A
-				case EnemyShipB1:
-				case EnemyShipB2:
-					return Color.GREEN; // Цвет для типа B
-				case EnemyShipC1:
-				case EnemyShipC2:
-					return Color.BLUE; // Цвет для типа C
-				case EnemyShipD1:
-				case EnemyShipD2:
-					return Color.YELLOW; // Цвет для типа D
-				case EnemyShipE1:
-				case EnemyShipE2:
-					return Color.ORANGE; // Цвет для типа E
-				default:
-					return Color.WHITE; // Цвет по умолчанию
-			}
-		}
-
 	/**
 	 * Constructor, establishes the ship's properties for a special ship, with
 	 * known starting properties.
 	 */
 	public EnemyShip() {
-		super(-32, 60, 16 * 2, 7 * 2, Color.RED);
-
+		super(-32, 60, 32, 14, Color.RED);
 		this.spriteType = SpriteType.EnemyShipSpecial;
 		this.isDestroyed = false;
 		this.pointValue = BONUS_TYPE_POINTS;
 	}
 
+	private int calculatePointValue(SpriteType spriteType, GameState gameState) {
+		int baseValue = switch (spriteType) {
+			case EnemyShipA1, EnemyShipA2 -> A_TYPE_POINTS;
+			case EnemyShipB1, EnemyShipB2 -> B_TYPE_POINTS;
+			case EnemyShipC1, EnemyShipC2 -> C_TYPE_POINTS;
+			case EnemyShipD1, EnemyShipD2 -> D_TYPE_POINTS;
+			case EnemyShipE1, EnemyShipE2 -> E_TYPE_POINTS;
+			case EnemyShipF1 -> F_TYPE_POINTS;
+			default -> 0;
+		};
+		return baseValue + (int) (gameState.getLevel() * 0.1) + Core.getLevelSetting();
+	}
+
+	public static Color getDefaultColor(SpriteType spriteType) {
+		return switch (spriteType) {
+			case EnemyShipA1, EnemyShipA2 -> Color.RED;
+			case EnemyShipB1, EnemyShipB2 -> Color.GREEN;
+			case EnemyShipC1, EnemyShipC2 -> Color.BLUE;
+			case EnemyShipD1, EnemyShipD2 -> Color.YELLOW;
+			case EnemyShipE1, EnemyShipE2 -> Color.ORANGE;
+			default -> Color.WHITE;
+		};
+	}
 	/**
 	 * Getter for the score bonus if this ship is destroyed.
-	 * 
+	 *
 	 * @return Value of the ship.
 	 */
 	public final int getPointValue() {
@@ -143,7 +113,7 @@ public class EnemyShip extends Entity {
 
 	/**
 	 * Moves the ship the specified distance.
-	 * 
+	 *
 	 * @param distanceX
 	 *            Distance to move in the X axis.
 	 * @param distanceY
@@ -160,42 +130,24 @@ public class EnemyShip extends Entity {
 	public final void update() {
 		if (this.animationCooldown.checkFinished()) {
 			this.animationCooldown.reset();
-
-			switch (this.spriteType) {
-			case EnemyShipA1:
-				this.spriteType = SpriteType.EnemyShipA2;
-				break;
-			case EnemyShipA2:
-				this.spriteType = SpriteType.EnemyShipA1;
-				break;
-			case EnemyShipB1:
-				this.spriteType = SpriteType.EnemyShipB2;
-				break;
-			case EnemyShipB2:
-				this.spriteType = SpriteType.EnemyShipB1;
-				break;
-			case EnemyShipC1:
-				this.spriteType = SpriteType.EnemyShipC2;
-				break;
-			case EnemyShipC2:
-				this.spriteType = SpriteType.EnemyShipC1;
-				break;
-			case EnemyShipD1:
-				this.spriteType = SpriteType.EnemyShipD2;
-				break;
-			case EnemyShipD2:
-				this.spriteType = SpriteType.EnemyShipD1;
-				break;
-			case EnemyShipE1:
-				this.spriteType = SpriteType.EnemyShipE2;
-				break;
-			case EnemyShipE2:
-				this.spriteType = SpriteType.EnemyShipE1;
-				break;
-			default:
-				break;
-			}
+			toggleSprite();
 		}
+	}
+
+	private void toggleSprite() {
+		this.spriteType = switch (this.spriteType) {
+			case EnemyShipA1 -> SpriteType.EnemyShipA2;
+			case EnemyShipA2 -> SpriteType.EnemyShipA1;
+			case EnemyShipB1 -> SpriteType.EnemyShipB2;
+			case EnemyShipB2 -> SpriteType.EnemyShipB1;
+			case EnemyShipC1 -> SpriteType.EnemyShipC2;
+			case EnemyShipC2 -> SpriteType.EnemyShipC1;
+			case EnemyShipD1 -> SpriteType.EnemyShipD2;
+			case EnemyShipD2 -> SpriteType.EnemyShipD1;
+			case EnemyShipE1 -> SpriteType.EnemyShipE2;
+			case EnemyShipE2 -> SpriteType.EnemyShipE1;
+			default -> this.spriteType;
+		};
 	}
 
 	/**
@@ -206,28 +158,29 @@ public class EnemyShip extends Entity {
 	public final void destroy(final float balance) {
 		this.isDestroyed = true;
 		this.spriteType = SpriteType.Explosion;
-        soundManager.playSound(Sound.ALIEN_HIT, balance);
+		soundManager.playSound(Sound.ALIEN_HIT, balance);
 	}
 
-    public final void HealthManageDestroy(final float balance) { //Determine whether to destroy the enemy ship based on its health
-        if(this.health <= 0){
-            this.isDestroyed = true;
-            this.spriteType = SpriteType.Explosion;
-        }else{
-            this.health--;
-        }
-        soundManager.playSound(Sound.ALIEN_HIT, balance);
-    }
+	public final void HealthManageDestroy(final float balance) { //Determine whether to destroy the enemy ship based on its health
+		if(this.health <= 0){
+			this.isDestroyed = true;
+			this.spriteType = SpriteType.Explosion;
+		}else{
+			this.health--;
+		}
+		soundManager.playSound(Sound.ALIEN_HIT, balance);
+	}
 
-	public int getHealth(){return this.health; }  //Receive enemy ship health
-
+	public int getHealth() {
+		return this.health;
+	}
 	public void setHealth(int health) {
 		this.health = health;
 	}
 
 	/**
 	 * Checks if the ship has been destroyed.
-	 * 
+	 *
 	 * @return True if the ship has been destroyed.
 	 */
 	public final boolean isDestroyed() {
