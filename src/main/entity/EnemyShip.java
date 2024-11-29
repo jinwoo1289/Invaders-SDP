@@ -158,14 +158,18 @@ public class EnemyShip extends Entity {
 		soundManager.playSound(Sound.ALIEN_HIT, balance);
 	}
 
-	public final void HealthManageDestroy(final float balance) { //Determine whether to destroy the enemy ship based on its health
-		if(this.health <= 0){
+	public final void HealthManageDestroy(final float balance) {
+		System.out.println("HealthManageDestroy called. Current health: " + this.health);
+
+		if (this.health > 0) {
+			this.health--; // 체력 감소
+		}
+
+		if (this.health == 0) { // 체력이 0이 되면 파괴
 			this.isDestroyed = true;
 			this.spriteType = SpriteType.Explosion;
-		}else{
-			this.health--;
+			soundManager.playSound(Sound.ALIEN_HIT, balance);
 		}
-		soundManager.playSound(Sound.ALIEN_HIT, balance);
 	}
 
 	public int getHealth() {
